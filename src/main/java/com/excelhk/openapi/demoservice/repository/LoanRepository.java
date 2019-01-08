@@ -1,6 +1,6 @@
-package com.excel.gradle.demo.repository;
+package com.excelhk.openapi.demoservice.repository;
 
-import com.excel.gradle.demo.bean.Loan;
+import com.excelhk.openapi.demoservice.bean.Loan;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;

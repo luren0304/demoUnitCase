@@ -1,4 +1,4 @@
-package com.excel.gradle.demo;
+package com.excelhk.openapi.demoservice;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

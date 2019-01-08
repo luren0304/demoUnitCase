@@ -1,4 +1,4 @@
-package com.excel.gradle.demo.controller;
+package com.excelhk.openapi.demoservice.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,8 +9,8 @@ public class MainController {
     public String index() {
         return "index";
     }
-    @GetMapping("/login")
+/*	@GetMapping("/login")
     public String login() {
         return "login";
-    }
+    }*/
 }

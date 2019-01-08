@@ -1,4 +1,4 @@
-package com.excel.gradle.demo;
+package com.excelhk.openapi.demoservice;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

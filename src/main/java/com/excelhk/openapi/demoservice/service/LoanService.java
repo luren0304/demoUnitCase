@@ -1,7 +1,7 @@
-package com.excel.gradle.demo.service;
+package com.excelhk.openapi.demoservice.service;
 
-import com.excel.gradle.demo.bean.Loan;
-import com.excel.gradle.demo.repository.LoanRepository;
+import com.excelhk.openapi.demoservice.bean.Loan;
+import com.excelhk.openapi.demoservice.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
