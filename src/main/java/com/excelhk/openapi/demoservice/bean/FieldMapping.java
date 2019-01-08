@@ -9,15 +9,15 @@ public class FieldMapping {
     private String product;
     private int order;
     private String field;
-    private String fielddesc;
+    private String fieldDesc;
     private boolean show;
 
-    public String getFielddesc() {
-        return fielddesc;
+    public String getFieldDesc() {
+        return fieldDesc;
     }
 
-    public void setFielddesc(String fielddesc) {
-        this.fielddesc = fielddesc;
+    public void setFieldDesc(String fieldDesc) {
+        this.fieldDesc = fieldDesc;
     }
 
     public boolean isShow() {

@@ -140,18 +140,18 @@ public class CommonUtils {
 			ls_context ="Request data: ";
 			lPw_Out.println(ls_context);
 			if (obj instanceof RateInfo) {
-				ls_context = ((RateInfo)obj).getCcy_Cde()+ fileDelimiter+((RateInfo)obj).getRelvt_Ccy_Cde();
+				ls_context = ((RateInfo)obj).getCcy_Cde()+ fileDelimiter+((RateInfo)obj).getRelvt_Ccy_Cde() + "\r\n";
 				ls_context +="Reply fields order: \r\n";
-				ls_context += getFieldname("EXCH_RATE");
+				ls_context += getFieldDesc("EXCH_RATE");
 			}else if (obj instanceof Loan) {
 				ls_context = ((Loan)obj).getProduct() + fileDelimiter + ((Loan)obj).getProdId() + "\r\n";
 				ls_context +="Reply fields order: \r\n";
-				ls_context += getFieldname(((Loan)obj).getProduct());
+				ls_context += getFieldDesc(((Loan)obj).getProduct());
 
 			}else if (obj instanceof Deposit) {
 				ls_context = ((Deposit)obj).getProduct() + fileDelimiter + ((Deposit)obj).getProdId() + "\r\n";
 				ls_context +="Reply fields order: \r\n";
-				ls_context += getFieldname( ((Deposit)obj).getProduct());
+				ls_context += getFieldDesc( ((Deposit)obj).getProduct());
 			}
 			lPw_Out.println(ls_context);
 			lPw_Out.flush();
@@ -478,7 +478,7 @@ public class CommonUtils {
 
 		return ls_Content;
 	}*/
-	public List<String> getFieldMapping(String as_Product){
+	public List<String> getFieldDescList(String as_Product){
 
 		List<FieldMapping> listResult = fieldMappingService.findAllByProductAndShowOrderByOrder(as_Product, true);
 
@@ -486,21 +486,21 @@ public class CommonUtils {
 		for (FieldMapping fieldMapping: listResult
 		) {
 			//fieldNameLst.add(fieldMapping.getField());
-			fieldNameLst.add(fieldMapping.getFielddesc());
+			fieldNameLst.add(fieldMapping.getFieldDesc());
 		}
 
 		return fieldNameLst;
 	}
 
-	public String getFieldname(String as_Product){
+	public String getFieldDesc(String as_Product){
 		String ls_Content="";
-		List<String>  fieldNameLst = getFieldMapping(as_Product);
-		for (int i = 0; i < fieldNameLst.size(); i++) {
-			String fieldName = fieldNameLst.get(i);
-			if(i != fieldNameLst.size() - 1)
-				ls_Content += fieldName + fileDelimiter;
+		List<String>  fieldDescLst = getFieldDescList(as_Product);
+		for (int i = 0; i < fieldDescLst.size(); i++) {
+			String ls_fieldDesc = fieldDescLst.get(i);
+			if(i != fieldDescLst.size() - 1)
+				ls_Content += ls_fieldDesc + fileDelimiter;
 			else
-				ls_Content += fieldName;
+				ls_Content += ls_fieldDesc;
 		}
 		return ls_Content;
 	}
