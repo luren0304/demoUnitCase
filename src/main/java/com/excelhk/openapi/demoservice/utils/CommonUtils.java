@@ -16,11 +16,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class CommonUtils {
@@ -44,6 +49,9 @@ public class CommonUtils {
 
 	@Autowired
 	private FieldMappingService fieldMappingService;
+
+	@Autowired
+	private InterfaceFileProcess interfaceFileProcess;
 
 	public String getFileName(String as_Filename) {
 		IdWorker id = new IdWorker(1);
@@ -453,7 +461,24 @@ public class CommonUtils {
 		}
 		return new SftpException(errCode, errMsg);
 	}
-	
+
+	public  Object responseFtpError(Object obj){
+		return responseFtpError(null, obj);
+	}
+	public Object responseFtpError(String as_Prod , Object obj){
+		try {
+			if(StringUtils.isEmpty(as_Prod))
+				return interfaceFileProcess.getDetails(obj);
+			else
+			return interfaceFileProcess.getProds(as_Prod,obj);
+		} catch (SftpException e) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("error", e.getMessage());
+			LOGGER.error("responseFtpError " +  e.getMessage());
+			return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	public String removeLFChar(String as_Str) {
 		String ls_Str = as_Str;
 		if(as_Str.contains("\r\n")) {
@@ -466,18 +491,6 @@ public class CommonUtils {
 		return ls_Str;
 	}
 
-/*	public String getFieldMapping(String as_Product){
-
-		String ls_Content ="";
-		List<FieldMapping> listResult = fieldMappingService.findAllByProductAndShowOrderByOrder(as_Product, true);
-
-		for (FieldMapping fieldMapping: listResult
-			 ) {
-			ls_Content += fieldMapping.getProduct() + fileDelimiter;
-		}
-
-		return ls_Content;
-	}*/
 	public List<String> getFieldDescList(String as_Product){
 
 		List<FieldMapping> listResult = fieldMappingService.findAllByProductAndShowOrderByOrder(as_Product, true);

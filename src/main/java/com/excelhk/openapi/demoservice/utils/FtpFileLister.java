@@ -21,7 +21,7 @@ public class FtpFileLister {
 			ftpFileEvent.setDownloadFlag(true);
 			
 		}else {
-			System.out.println("file doens't exist");
+			System.out.println("file doesn't exist");
 			ftpFileEvent.setDownloadFlag(false);
 		}
 	}

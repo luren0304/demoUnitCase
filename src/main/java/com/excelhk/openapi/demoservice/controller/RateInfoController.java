@@ -1,18 +1,13 @@
 package com.excelhk.openapi.demoservice.controller;
 
 import com.excelhk.openapi.demoservice.bean.RateInfo;
-import com.excelhk.openapi.demoservice.utils.InterfaceFileProcess;
-import com.jcraft.jsch.SftpException;
+import com.excelhk.openapi.demoservice.utils.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/rateinfo")
@@ -20,7 +15,8 @@ public class RateInfoController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(RateInfoController.class);
 	@Autowired
-	private InterfaceFileProcess interfaceFileProcess;
+	//private InterfaceFileProcess interfaceFileProcess;
+	private CommonUtils commonUtils;
 	
 	
 	
@@ -49,13 +45,14 @@ public class RateInfoController {
 		RateInfo rateInfo = new RateInfo();
 		rateInfo.setCcy_Cde(as_Ccy);
 		rateInfo.setRelvt_Ccy_Cde(as_RelvtCcy);
-		try {
+		return commonUtils.responseFtpError(rateInfo);
+		/*try {
 			return interfaceFileProcess.getDetails(rateInfo);
 		} catch (SftpException e) {
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("error", e.getMessage());
 			return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		}*/
 		
 	}	
 	

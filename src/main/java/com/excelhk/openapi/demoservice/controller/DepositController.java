@@ -2,18 +2,13 @@ package com.excelhk.openapi.demoservice.controller;
 
 import com.excelhk.openapi.demoservice.bean.Deposit;
 import com.excelhk.openapi.demoservice.service.DepositService;
-import com.excelhk.openapi.demoservice.utils.InterfaceFileProcess;
-import com.jcraft.jsch.SftpException;
+import com.excelhk.openapi.demoservice.utils.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/deposits")
@@ -25,7 +20,8 @@ public class DepositController {
 	DepositService depositService;
 
 	@Autowired
-	private InterfaceFileProcess interfaceFileProcess;
+	private CommonUtils commonUtils;
+
     @RequestMapping(method = RequestMethod.POST, value="/createObj")
     public boolean createObj(Deposit deposit) {
         logger.info("createObj start");
@@ -46,20 +42,22 @@ public class DepositController {
 	public Object findByProdId(@PathVariable("prodid") String as_ProdId, @RequestHeader(value = "connection-type", required = false) String as_ConnType) {
         logger.info("findByProdId" + as_ProdId);
 		logger.info("as_ConnType " + as_ConnType);
-		if(as_ConnType !=null && !as_ConnType.equalsIgnoreCase("ftp")) {
-			return depositService.findByProdId(as_ProdId);
-		}else {
+		if(as_ConnType !=null && as_ConnType.equalsIgnoreCase("ftp")) {
 			Deposit deposit = new Deposit();
 			deposit.setProdId(as_ProdId);
 			deposit.setProduct("Deposits");
-			try {
+			return commonUtils.responseFtpError(deposit);
+			/*try {
 				return interfaceFileProcess.getDetails(deposit);
 			} catch (SftpException e) {
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("error", e.getMessage());
 				logger.error("findByProdId" +  e.getMessage());
 				return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
-			}
+			}*/
+		}else {
+			return depositService.findByProdId(as_ProdId);
+
 		}
     }
 
@@ -76,6 +74,8 @@ public class DepositController {
 		if(as_ConnType !=null && !as_ConnType.equalsIgnoreCase("ftp")) {
 			return depositService.findAllProdId();
 		}else {
+			return commonUtils.responseFtpError("Deposits",new Deposit());
+			/*
 			try {
 				return interfaceFileProcess.getProds("Deposits", new Deposit());
 			} catch (SftpException e) {
@@ -83,7 +83,7 @@ public class DepositController {
 				map.put("error", e.getMessage());
 				logger.error("findByProdId" +  e.getMessage());
 				return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
-			}
+			}*/
 		}
     }
 
