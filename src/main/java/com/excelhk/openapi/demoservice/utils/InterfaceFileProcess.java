@@ -17,7 +17,7 @@ import java.util.List;
 
 @Component
 public class InterfaceFileProcess {
-	
+
 	@Value("${sftp.waitTime}")
 	private long waitTime;
 
@@ -64,20 +64,6 @@ public class InterfaceFileProcess {
 			//get remote in file
 			logger.info("download file start");
 			success = downloadLoop(ls_FileName);
-			/*FtpFileEvent ftpFileEvent = new FtpFileEvent(this, ls_FileName);
-			int loopCnt = 10;
-			for(int i = 0; i < loopCnt; i ++) {
-				try {
-					applicationContext.publishEvent(ftpFileEvent);
-					success = ftpFileEvent.isDownloadFlag();
-					if(success)
-						break;
-					if(i != loopCnt - 1)
-						Thread.sleep(waitTime/loopCnt);
-				} catch (Exception e) {
-					throw commonUtils.handleErr(e);
-				}
-			}*/
 			if(success) {
 				logger.info("download file successfully");
 				logger.info("get file details");
@@ -115,21 +101,6 @@ public class InterfaceFileProcess {
 			//get remote in file
 			logger.info("download file start");
 			success = downloadLoop(ls_FileName);
-			/*FtpFileEvent ftpFileEvent = new FtpFileEvent(this, ls_FileName);
-			int loopCnt = 10;
-			for(int i = 0; i < loopCnt; i ++) {
-				try {
-					applicationContext.publishEvent(ftpFileEvent);
-					success = ftpFileEvent.isDownloadFlag();
-					if(success)
-						break;
-					if(i != loopCnt - 1)
-						Thread.sleep(waitTime/loopCnt);
-				} catch (Exception e) {
-					throw commonUtils.handleErr(e);
-				}
-			}*/
-			
 			if(success) {
 				logger.info("download file successfully");
 				logger.info("get file details");
@@ -140,11 +111,11 @@ public class InterfaceFileProcess {
 		return l_PordLst;
 	}
 
-	public boolean downloadLoop(String as_FileName) throws SftpException{
+	private boolean downloadLoop(String as_FileName) throws SftpException{
 		boolean success = false;
 		FtpFileEvent ftpFileEvent = new FtpFileEvent(this, as_FileName);
-		//int loopCnt = 10;
 		for(int i = 0; i < loopCnt; i ++) {
+			logger.info("loop i = " + i);
 			try {
 				applicationContext.publishEvent(ftpFileEvent);
 				success = ftpFileEvent.isDownloadFlag();

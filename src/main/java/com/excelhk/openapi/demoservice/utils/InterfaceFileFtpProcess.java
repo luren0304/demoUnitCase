@@ -111,8 +111,8 @@ public class InterfaceFileFtpProcess {
 				LOGGER.info("Rename the remote file successfully End");
 				return true;
 			}else {
-					LOGGER.info("The remote file doesn't exist.");
-					return false;
+				LOGGER.info("The remote file doesn't exist. File Name: " + as_FileName);
+				return false;
 			}
 		} catch (Exception e) {
 			LOGGER.error("upload file failed. error message: " + e.getMessage() );
