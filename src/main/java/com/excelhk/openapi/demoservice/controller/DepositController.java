@@ -47,14 +47,6 @@ public class DepositController {
 			deposit.setProdId(as_ProdId);
 			deposit.setProduct("Deposits");
 			return commonUtils.responseFtpError(deposit);
-			/*try {
-				return interfaceFileProcess.getDetails(deposit);
-			} catch (SftpException e) {
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("error", e.getMessage());
-				logger.error("findByProdId" +  e.getMessage());
-				return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
-			}*/
 		}else {
 			return depositService.findByProdId(as_ProdId);
 
@@ -71,19 +63,10 @@ public class DepositController {
 	public Object findAllProd(@RequestHeader(value = "connection-type", required = false) String as_ConnType) {
         logger.info("findAllProd");
 		logger.info("as_ConnType " + as_ConnType);
-		if(as_ConnType !=null && !as_ConnType.equalsIgnoreCase("ftp")) {
-			return depositService.findAllProdId();
+		if(as_ConnType !=null && as_ConnType.equalsIgnoreCase("ftp")) {
+            return commonUtils.responseFtpError("Deposits",new Deposit());
 		}else {
-			return commonUtils.responseFtpError("Deposits",new Deposit());
-			/*
-			try {
-				return interfaceFileProcess.getProds("Deposits", new Deposit());
-			} catch (SftpException e) {
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("error", e.getMessage());
-				logger.error("findByProdId" +  e.getMessage());
-				return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
-			}*/
+            return depositService.findAllProdId();
 		}
     }
 

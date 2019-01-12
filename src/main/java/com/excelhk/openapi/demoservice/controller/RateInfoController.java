@@ -15,7 +15,6 @@ public class RateInfoController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(RateInfoController.class);
 	@Autowired
-	//private InterfaceFileProcess interfaceFileProcess;
 	private CommonUtils commonUtils;
 	
 	
@@ -46,14 +45,6 @@ public class RateInfoController {
 		rateInfo.setCcy_Cde(as_Ccy);
 		rateInfo.setRelvt_Ccy_Cde(as_RelvtCcy);
 		return commonUtils.responseFtpError(rateInfo);
-		/*try {
-			return interfaceFileProcess.getDetails(rateInfo);
-		} catch (SftpException e) {
-			Map<String, String> map = new HashMap<String, String>();
-			map.put("error", e.getMessage());
-			return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
-		}*/
-		
-	}	
+	}
 	
 }

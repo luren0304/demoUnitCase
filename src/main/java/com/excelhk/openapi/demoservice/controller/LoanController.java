@@ -13,12 +13,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/loans")
 public class LoanController {
-
     private static final Logger logger = LoggerFactory.getLogger(LoanController.class);
     @Autowired
     LoanService loanService;
 	@Autowired
 	private CommonUtils commonUtils;
+
+
 
     @RequestMapping(method = RequestMethod.POST, value="/createObj")
     public boolean createObj(Loan Loan) {
@@ -45,14 +46,6 @@ public class LoanController {
 			loan.setProdId(as_ProdId);
 			loan.setProduct("Loans");
 			return commonUtils.responseFtpError(loan);
-			/*try {
-				return interfaceFileProcess.getDetails(loan);
-			} catch (SftpException e) {
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("error", e.getMessage());
-				logger.error("findByProdId" +  e.getMessage());
-				return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
-			}*/
 		}else {
 			return loanService.findByProdId(as_ProdId);
 		}
@@ -70,14 +63,6 @@ public class LoanController {
 		logger.info("as_ConnType " + as_ConnType);
 		if(as_ConnType != null && as_ConnType.equalsIgnoreCase("ftp")) {
 			return commonUtils.responseFtpError("Loans", new Loan());
-			/*try {
-				return interfaceFileProcess.getProds("Loans", new Loan());
-			} catch (SftpException e) {
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("error", e.getMessage());
-				logger.error("findByProdId" +  e.getMessage());
-				return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
-			}*/
 		}else {
 			return loanService.findAllProdId();
 		}
