@@ -3,6 +3,7 @@ package com.excelhk.openapi.demoservice.controller;
 import com.excelhk.openapi.demoservice.bean.Loan;
 import com.excelhk.openapi.demoservice.service.LoanService;
 import com.excelhk.openapi.demoservice.utils.CommonUtils;
+import com.excelhk.openapi.demoservice.utils.constants.DemoConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class LoanController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/findone/prodid/{prodid}")
-	public Object findByProdId(@PathVariable("prodid") String as_ProdId, @RequestHeader(value = "connection-type", required = false) String as_ConnType) {
+	public Object findByProdId(@PathVariable("prodid") String as_ProdId, @RequestHeader(value = DemoConstants.REQUEST_TOKEN_HEADER, required = false) String as_ConnType) {
         logger.info("findByProdId" + as_ProdId);
 		logger.info("as_ConnType " + as_ConnType);
 		if(as_ConnType != null && as_ConnType.equalsIgnoreCase("ftp")) {
@@ -58,7 +59,7 @@ public class LoanController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/findProd")
-	public Object findAllProd(@RequestHeader(value = "connection-type", required = false) String as_ConnType) {
+	public Object findAllProd(@RequestHeader(value = DemoConstants.REQUEST_TOKEN_HEADER, required = false) String as_ConnType) {
         logger.info("findAllProd");
 		logger.info("as_ConnType " + as_ConnType);
 		if(as_ConnType != null && as_ConnType.equalsIgnoreCase("ftp")) {

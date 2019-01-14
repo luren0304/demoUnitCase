@@ -1,0 +1,6 @@
+ReplyFileName=prod.Deposits.D2.4234323756418048.csv
+Delimiter=,
+Request data: 
+Deposits,D2
+Reply fields order: 
+null,null,null,null,null,null,null,null,null
