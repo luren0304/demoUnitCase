@@ -1,6 +1,0 @@
-ReplyFileName=prod.Loans.L1.4234313028944896.csv
-Delimiter=,
-Request data: 
-Loans,L1
-Reply fields order: 
-null,null,null,null,null,null,null,null,null,null

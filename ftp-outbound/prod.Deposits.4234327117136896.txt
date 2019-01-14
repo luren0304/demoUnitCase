@@ -1,3 +1,0 @@
-ReplyFileName=prod.Deposits.4234327117136896.csv
-Delimiter=,
-Deposits
