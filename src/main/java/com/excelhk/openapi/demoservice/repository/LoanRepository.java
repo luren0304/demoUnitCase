@@ -13,4 +13,6 @@ public interface LoanRepository extends MongoRepository<Loan, String> {
     @Query(value="{}", fields= "{'prodId' : 1,'_id' : 0}")
     public List<Loan> findAllprodId();
 
+
+
 }

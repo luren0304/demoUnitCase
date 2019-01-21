@@ -5,6 +5,7 @@ import com.excelhk.openapi.demoservice.bean.FieldMapping;
 import com.excelhk.openapi.demoservice.bean.Loan;
 import com.excelhk.openapi.demoservice.bean.RateInfo;
 import com.excelhk.openapi.demoservice.service.FieldMappingService;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.opencsv.CSVReader;
@@ -109,8 +110,9 @@ public class CommonUtils {
 			return false;
 		}finally{
 			
-			if(lPw_Out  !=null )
-				lPw_Out.close(); 
+			if(lPw_Out  !=null ) {
+				lPw_Out.close();
+			}
 		}
 	}
 	
@@ -169,8 +171,9 @@ public class CommonUtils {
 			return false;
 		}finally{
 			
-			if(lPw_Out  !=null )
-				lPw_Out.close(); 
+			if(lPw_Out  !=null ) {
+				lPw_Out.close();
+			}
 		}
 	}
 	
@@ -273,24 +276,33 @@ public class CommonUtils {
 			while((ls_NextLine=reader.readNext()) != null) {
 				LOGGER.info("ls_NextLine.length : " +ls_NextLine.length);
 				//info
-				if(info.getProdId() == null)
-						info.setProdId(ls_NextLine[0]);
-				if (ls_NextLine.length > 2)
+				if(info.getProdId() == null) {
+					info.setProdId(ls_NextLine[0]);
+				}
+				if (ls_NextLine.length > 2) {
 					info.setProduct(ls_NextLine[1]);
-				if (ls_NextLine.length > 2)
+				}
+				if (ls_NextLine.length > 2) {
 					info.setType(ls_NextLine[2]);
-				if (ls_NextLine.length > 3)
+				}
+				if (ls_NextLine.length > 3) {
 					info.setSubtype(ls_NextLine[3]);
-				if (ls_NextLine.length > 4)
+				}
+				if (ls_NextLine.length > 4) {
 					info.setCurrency(ls_NextLine[4]);
-				if (ls_NextLine.length > 5)
+				}
+				if (ls_NextLine.length > 5) {
 					info.setInterestRate(ls_NextLine[5]);
-				if (ls_NextLine.length > 6)
+				}
+				if (ls_NextLine.length > 6) {
 					info.setMinamount(ls_NextLine[6]);
-				if (ls_NextLine.length > 7)
+				}
+				if (ls_NextLine.length > 7) {
 					info.setFee(ls_NextLine[7]);
-				if (ls_NextLine.length > 8)
+				}
+				if (ls_NextLine.length > 8) {
 					info.setRemark(removeLFChar(ls_NextLine[8]));
+				}
 				a_Lst.add(info);
 				info = new Deposit();
 			}
@@ -334,26 +346,36 @@ public class CommonUtils {
 			reader = new CSVReaderBuilder(new FileReader(ls_localInpath)).withCSVParser(rfc4180Parser).build();
 			while((ls_NextLine=reader.readNext()) != null) {
 				LOGGER.info("ls_NextLine.length : " +ls_NextLine.length);
-				if(info.getProdId() == null)
+				if(info.getProdId() == null) {
 					info.setProdId(ls_NextLine[0]);
-				if (ls_NextLine.length > 1)
+				}
+				if (ls_NextLine.length > 1) {
 					info.setProduct(ls_NextLine[1]);
-				if (ls_NextLine.length > 2)	
+				}
+				if (ls_NextLine.length > 2) {
 					info.setType(ls_NextLine[2]);
-				if (ls_NextLine.length > 3)					
+				}
+				if (ls_NextLine.length > 3) {
 					info.setSubtype(ls_NextLine[3]);
-				if (ls_NextLine.length > 4)
+				}
+				if (ls_NextLine.length > 4) {
 					info.setInterestRate(ls_NextLine[4]);
-				if (ls_NextLine.length > 5)
+				}
+				if (ls_NextLine.length > 5) {
 					info.setPrdinfo1(removeLFChar(ls_NextLine[5]));
-				if (ls_NextLine.length > 6)	
+				}
+				if (ls_NextLine.length > 6) {
 					info.setPrdinfo2(removeLFChar(ls_NextLine[6]));
-				if (ls_NextLine.length > 7)
+				}
+				if (ls_NextLine.length > 7) {
 					info.setPrdinfo3(removeLFChar(ls_NextLine[7]));
-				if (ls_NextLine.length > 8)
+				}
+				if (ls_NextLine.length > 8) {
 					info.setFee(ls_NextLine[8]);
-				if (ls_NextLine.length > 9)
+				}
+				if (ls_NextLine.length > 9) {
 					info.setRemark(removeLFChar(ls_NextLine[9]));
+				}
 				a_Lst.add(info);
 				info = new Loan();
 			}
@@ -404,16 +426,21 @@ public class CommonUtils {
 					info.setCcy_Cde(ls_Ccy);
 					info.setRelvt_Ccy_Cde(ls_RelvtCcy);
 				}
-				if (ls_NextLine.length > 1)
+				if (ls_NextLine.length > 1) {
 					info.setBid(new BigDecimal(ls_NextLine[1]));
-				if (ls_NextLine.length > 2)
+				}
+				if (ls_NextLine.length > 2) {
 					info.setMid(new BigDecimal(ls_NextLine[2]));
-				if (ls_NextLine.length > 3)
+				}
+				if (ls_NextLine.length > 3) {
 					info.setAsk(new BigDecimal(ls_NextLine[3]));
-				if (ls_NextLine.length > 4)
+				}
+				if (ls_NextLine.length > 4) {
 					info.setFeed_Source(ls_NextLine[4]);
-				if (ls_NextLine.length > 5)
+				}
+				if (ls_NextLine.length > 5) {
 					info.setLastDate(ls_NextLine[5]);
+				}
 				a_Lst.add(info);
 				info = new RateInfo();
 			}
@@ -453,10 +480,16 @@ public class CommonUtils {
 				errMsg = "ftp Connection Exception";
 			}
 		}else if (e instanceof SftpException) {
-			LOGGER.error("SftpException error message: " + msg);
+			LOGGER.error("ChannelSftp " + msg);
+			if(((SftpException) e).id == ChannelSftp.SSH_FX_NO_CONNECTION || ((SftpException) e).id == ChannelSftp.SSH_FX_CONNECTION_LOST ){
+				msg = "Connection error";
+			}else {
+				msg = "Internal Server error";
+			}
 			errMsg = "ftp error: " + msg;
 		}else {
 			LOGGER.error("other error message: " + msg);
+			msg = "Internal Server error";
 			errMsg = msg;
 		}
 		return new SftpException(errCode, errMsg);
@@ -467,10 +500,11 @@ public class CommonUtils {
 	}
 	public Object responseFtpError(String as_Prod , Object obj){
 		try {
-			if(StringUtils.isEmpty(as_Prod))
+			if(StringUtils.isEmpty(as_Prod)) {
 				return interfaceFileProcess.getDetails(obj);
-			else
-			return interfaceFileProcess.getProds(as_Prod,obj);
+			} else {
+				return interfaceFileProcess.getProds(as_Prod,obj);
+			}
 		} catch (SftpException e) {
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("error", e.getMessage());
@@ -510,10 +544,11 @@ public class CommonUtils {
 		List<String>  fieldDescLst = getFieldDescList(as_Product);
 		for (int i = 0; i < fieldDescLst.size(); i++) {
 			String ls_fieldDesc = fieldDescLst.get(i);
-			if(i != fieldDescLst.size() - 1)
+			if(i != fieldDescLst.size() - 1) {
 				ls_Content += ls_fieldDesc + fileDelimiter;
-			else
+			} else {
 				ls_Content += ls_fieldDesc;
+			}
 		}
 		return ls_Content;
 	}

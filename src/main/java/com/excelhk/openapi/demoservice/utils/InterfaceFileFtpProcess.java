@@ -115,7 +115,7 @@ public class InterfaceFileFtpProcess {
 				return false;
 			}
 		} catch (Exception e) {
-			LOGGER.error("upload file failed. error message: " + e.getMessage() );
+			LOGGER.error("download file failed. error message: " + e.getMessage() );
 			e.printStackTrace();
 			throw e;
 		}finally {

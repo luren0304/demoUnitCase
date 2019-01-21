@@ -111,18 +111,29 @@ public class InterfaceFileProcess {
 		return l_PordLst;
 	}
 
-	private boolean downloadLoop(String as_FileName) throws SftpException{
+	private boolean downloadLoop(String as_FileName) throws SftpException {
 		boolean success = false;
+		SftpException sftpException = null;
 		FtpFileEvent ftpFileEvent = new FtpFileEvent(this, as_FileName);
 		for(int i = 0; i < loopCnt; i ++) {
 			logger.info("loop i = " + i);
 			try {
 				applicationContext.publishEvent(ftpFileEvent);
 				success = ftpFileEvent.isDownloadFlag();
-				if(success)
+				if (success) {
 					break;
-				if(i != loopCnt - 1)
-					Thread.sleep(waitTime*1000/loopCnt);
+				} else {
+					sftpException = ftpFileEvent.getSftpException();
+					if (sftpException != null) {
+						throw sftpException;
+					}
+				}
+
+				if (i != loopCnt - 1) {
+					Thread.sleep(waitTime * 1000 / loopCnt);
+				}
+			}catch(SftpException e){
+				throw e;
 			} catch (Exception e) {
 				throw commonUtils.handleErr(e);
 			}
