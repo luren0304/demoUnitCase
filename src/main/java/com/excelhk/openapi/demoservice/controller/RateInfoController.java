@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
+/**
+ * @author anita 
+ */
+
 @RestController
 @RequestMapping("/rateinfo")
 public class RateInfoController {
@@ -16,8 +20,6 @@ public class RateInfoController {
 	private static final Logger logger = LoggerFactory.getLogger(RateInfoController.class);
 	@Autowired
 	private CommonUtils commonUtils;
-	
-	
 	
 	@RequestMapping("/index.html")
 	public String index() {
@@ -27,23 +29,22 @@ public class RateInfoController {
 	@RequestMapping("infor")
 	@ResponseBody
 	public Object getRateInfo() {
-		RateInfo l_RateInfo = new RateInfo();
-		l_RateInfo.setAsk(new BigDecimal(7.7500 + Math.random()).setScale(8, BigDecimal.ROUND_HALF_UP));
-		l_RateInfo.setBid(new BigDecimal(7.7500 + Math.random()).setScale(8, BigDecimal.ROUND_HALF_UP));
-		l_RateInfo.setBid(new BigDecimal(7.7500 + Math.random()).setScale(8, BigDecimal.ROUND_HALF_UP));
-		l_RateInfo.setCcy_Cde("USD");
-		l_RateInfo.setRelvt_Ccy_Cde("HKD");
-		l_RateInfo.setFeed_Source("BLOOMBERG");
-		//l_RateInfo.setLts_Last_Date(new Timestamp(new Date().getTime()));
-		return l_RateInfo;
+		RateInfo rateInfo = new RateInfo();
+		rateInfo.setAsk(new BigDecimal(7.7500 + Math.random()).setScale(8, BigDecimal.ROUND_HALF_UP));
+		rateInfo.setBid(new BigDecimal(7.7500 + Math.random()).setScale(8, BigDecimal.ROUND_HALF_UP));
+		rateInfo.setBid(new BigDecimal(7.7500 + Math.random()).setScale(8, BigDecimal.ROUND_HALF_UP));
+		rateInfo.setCcyCde("USD");
+		rateInfo.setRelvtCcyCde("HKD");
+		rateInfo.setFeedSource("BLOOMBERG");
+		return rateInfo;
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/RateCcy/{RateCcy}/RateRelvtCcy/{RateRelvtCcy}")
-	public Object getRateDetails(@PathVariable("RateCcy") String as_Ccy, @PathVariable("RateRelvtCcy") String as_RelvtCcy) {
-		logger.info("getRateDetails ccy = " + as_Ccy + " relvtCcy = " + as_RelvtCcy);
+	public Object getRateDetails(@PathVariable("RateCcy") String ccy, @PathVariable("RateRelvtCcy") String relvtCcy) {
+		logger.info("getRateDetails ccy = " + ccy + " relvtCcy = " + relvtCcy);
 		RateInfo rateInfo = new RateInfo();
-		rateInfo.setCcy_Cde(as_Ccy);
-		rateInfo.setRelvt_Ccy_Cde(as_RelvtCcy);
+		rateInfo.setCcyCde(ccy);
+		rateInfo.setRelvtCcyCde(relvtCcy);
 		return commonUtils.responseFtpError(rateInfo);
 	}
 	

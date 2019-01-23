@@ -36,6 +36,8 @@ dependencies {
     //implementation('javax.ws.rs:javax.ws.rs-api')
     implementation('org.glassfish.jersey.core:jersey-client')
     implementation('org.glassfish.jersey.core:jersey-common')
+    implementation('org.springframework.boot:spring-boot-starter-integration')
+    implementation('org.springframework.integration:spring-integration-sftp')
     implementation('com.jcraft:jsch:0.1.55')
     implementation('com.opencsv:opencsv:4.4')
     providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')

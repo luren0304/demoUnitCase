@@ -7,11 +7,23 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @author anita
+ */
 @Repository
 public interface DepositRepository extends MongoRepository<Deposit, String> {
 
-    public List<Deposit> findByProdId(String as_ProdId);
+    /**
+     *  Retrieve record details by product id
+     * @param prodId
+     * @return
+     */
+    public List<Deposit> findByProdId(String prodId);
 
+    /**
+     * Retrieve all product id
+     * @return
+     */
     @Query(value="{}", fields= "{'prodId' : 1,'_id' : 0}")
     public List<Deposit> findAllprodId();
 

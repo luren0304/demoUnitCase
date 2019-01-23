@@ -5,6 +5,7 @@ import com.excelhk.openapi.demoservice.bean.FieldMapping;
 import com.excelhk.openapi.demoservice.bean.Loan;
 import com.excelhk.openapi.demoservice.bean.RateInfo;
 import com.excelhk.openapi.demoservice.service.FieldMappingService;
+import com.excelhk.openapi.demoservice.utils.constants.DemoConstants;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -28,6 +29,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author anita
+ *
+ */
 @Configuration
 public class CommonUtils {
 	
@@ -54,64 +59,72 @@ public class CommonUtils {
 	@Autowired
 	private InterfaceFileProcess interfaceFileProcess;
 
-	public String getFileName(String as_Filename) {
+	public String getFileName(String fileName) {
 		IdWorker id = new IdWorker(1);
-		return as_Filename + "." +id.nextId();
+		return fileName + "." +id.nextId();
 	}
-	
-	
 	/**
+	 *
 	 * check if directory exists, if not, create it.
+	 * @param dir
 	 */
-	public void checkDirExist(String as_Dir) {
-		LOGGER.info("as_Dir " + as_Dir);
-		File filedir = new File(as_Dir);
-		if(!filedir.exists()) {
-			filedir.mkdirs();
+	public void checkDirExist(String dir) {
+		LOGGER.info("dir " + dir);
+		File fileDir = new File(dir);
+		if(!fileDir.exists()) {
+			fileDir.mkdirs();
 		}
 	}
-	
+
+	public static String getFullPath(String path){
+		if(!path.endsWith(File.separator)) {
+			return path + File.separator ;
+		}else {
+			return path;
+		}
+	}
+
 	/**
 	 * Generate request file with content
 	 * 
-	 * @param as_FileName
-	 * @param as_content
+	 * @param fileName
+	 * @param contentParam
 	 * @return
 	 */
-	public boolean generateFile(String as_FileName, String as_content) {
-		LOGGER.info("as_FileName " + as_FileName);
-		LOGGER.info("as_content " + as_content);
-		if(as_FileName == null || as_content == null) {
-			LOGGER.info("one of as_FileName and as_content is null" );
+	public boolean generateFile(String fileName, String contentParam) {
+		LOGGER.info("fileName " + fileName);
+		LOGGER.info("contentParam " + contentParam);
+		if(fileName == null || contentParam == null) {
+			LOGGER.info("one of fileName and content is null" );
 			return false;
 		}
-		String ls_context="ReplyFileName=" + as_FileName;
+		String content="ReplyFileName=" + fileName;
 		
-		PrintWriter lPw_Out = null;
+		PrintWriter outContent = null;
 		try{
-			String ls_localOutpath = null;
+			String localOutpathString = null;
 			checkDirExist(localOutpath);
 			if(!localOutpath.endsWith(File.separator)) {
-				ls_localOutpath = localOutpath + File.separator + as_FileName + "." + remoteOutFileConv;
+				localOutpathString = localOutpath + File.separator + fileName + "." + remoteOutFileConv;
 			}else {
-				ls_localOutpath = localOutpath + as_FileName + "." + remoteOutFileConv;;
+				localOutpathString = localOutpath + fileName + "." + remoteOutFileConv;;
 			}
-			LOGGER.info("ls_localOutpath " + ls_localOutpath);
-			lPw_Out = new PrintWriter(new BufferedWriter(new FileWriter(ls_localOutpath, false)), true);
-			lPw_Out.println(ls_context + "." + remoteInFileConv);
-			ls_context = "Delimiter=" + fileDelimiter;
-			lPw_Out.println(ls_context);
-			ls_context = as_content;
-			lPw_Out.println(ls_context);
-			lPw_Out.flush();
+			LOGGER.info("localOutpathString " + localOutpathString);
+			outContent = new PrintWriter(new BufferedWriter(new FileWriter(localOutpathString, false)), true);
+			outContent.println(content + "." + remoteInFileConv);
+			content = "Delimiter=" + fileDelimiter;
+			outContent.println(content);
+			content = contentParam;
+			outContent.println(content);
+			outContent.flush();
 			return true;
 		}catch(Exception ex){
 			ex.printStackTrace();
 			return false;
 		}finally{
 			
-			if(lPw_Out  !=null ) {
-				lPw_Out.close();
+			if(outContent  !=null ) {
+				outContent.close();
 			}
 		}
 	}
@@ -120,59 +133,59 @@ public class CommonUtils {
 	/**
 	 * Generate request file by object
 	 * 
-	 * @param as_FileName
+	 * @param fileName
 	 * @param obj
 	 * @return
 	 */
-	public boolean generateFile(String as_FileName, Object obj) {
+	public boolean generateFile(String fileName, Object obj) {
 		
-		LOGGER.info("as_FileName " + as_FileName);
+		LOGGER.info("fileName " + fileName);
 		LOGGER.info("obj " + obj);
-		if(as_FileName == null || obj == null) {
-			LOGGER.info("one of as_FileName and obj is null" );
+		if(fileName == null || obj == null) {
+			LOGGER.info("one of fileName and obj is null" );
 			return false;
 		}
-		String ls_context="ReplyFileName=" + as_FileName;
-		PrintWriter lPw_Out = null;
+		String content="ReplyFileName=" + fileName;
+		PrintWriter outContent = null;
 		try{
-			String ls_localOutpath = null;
+			String localOutpathString = null;
 			checkDirExist(localOutpath);
 			if(!localOutpath.endsWith(File.separator)) {
-				ls_localOutpath = localOutpath + File.separator + as_FileName + "." + remoteOutFileConv;
+				localOutpathString = localOutpath + File.separator + fileName + "." + remoteOutFileConv;
 			}else {
-				ls_localOutpath = localOutpath + as_FileName + "." + remoteOutFileConv;
+				localOutpathString = localOutpath + fileName + "." + remoteOutFileConv;
 			}
-			LOGGER.info("ls_localOutpath " + ls_localOutpath);
-			lPw_Out = new PrintWriter(new BufferedWriter(new FileWriter(ls_localOutpath, false)), true);
-			lPw_Out.println(ls_context + "." + remoteInFileConv);
-			ls_context = "Delimiter=" + fileDelimiter;
-			lPw_Out.println(ls_context);
-			ls_context ="Request data: ";
-			lPw_Out.println(ls_context);
+			LOGGER.info("localOutpathString " + localOutpathString);
+			outContent = new PrintWriter(new BufferedWriter(new FileWriter(localOutpathString, false)), true);
+			outContent.println(content + "." + remoteInFileConv);
+			content = "Delimiter=" + fileDelimiter;
+			outContent.println(content);
+			content ="Request data: ";
+			outContent.println(content);
 			if (obj instanceof RateInfo) {
-				ls_context = ((RateInfo)obj).getCcy_Cde()+ fileDelimiter+((RateInfo)obj).getRelvt_Ccy_Cde() + "\r\n";
-				ls_context +="Reply fields order: \r\n";
-				ls_context += getFieldDesc("EXCH_RATE");
+				content = ((RateInfo)obj).getCcyCde()+ fileDelimiter+((RateInfo)obj).getRelvtCcyCde() + "\r\n";
+				content +="Reply fields order: \r\n";
+				content += getFieldDesc("EXCH_RATE");
 			}else if (obj instanceof Loan) {
-				ls_context = ((Loan)obj).getProduct() + fileDelimiter + ((Loan)obj).getProdId() + "\r\n";
-				ls_context +="Reply fields order: \r\n";
-				ls_context += getFieldDesc(((Loan)obj).getProduct());
+				content = ((Loan)obj).getProduct() + fileDelimiter + ((Loan)obj).getProdId() + "\r\n";
+				content +="Reply fields order: \r\n";
+				content += getFieldDesc(((Loan)obj).getProduct());
 
 			}else if (obj instanceof Deposit) {
-				ls_context = ((Deposit)obj).getProduct() + fileDelimiter + ((Deposit)obj).getProdId() + "\r\n";
-				ls_context +="Reply fields order: \r\n";
-				ls_context += getFieldDesc( ((Deposit)obj).getProduct());
+				content = ((Deposit)obj).getProduct() + fileDelimiter + ((Deposit)obj).getProdId() + "\r\n";
+				content +="Reply fields order: \r\n";
+				content += getFieldDesc( ((Deposit)obj).getProduct());
 			}
-			lPw_Out.println(ls_context);
-			lPw_Out.flush();
+			outContent.println(content);
+			outContent.flush();
 			return true;
 		}catch(Exception ex){
 			ex.printStackTrace();
 			return false;
 		}finally{
 			
-			if(lPw_Out  !=null ) {
-				lPw_Out.close();
+			if(outContent  !=null ) {
+				outContent.close();
 			}
 		}
 	}
@@ -182,17 +195,17 @@ public class CommonUtils {
 	 * Decompose reply file for details
 	 * 
 	 * @param obj
-	 * @param as_Filename
-	 * @param a_Lst
+	 * @param fileName
+	 * @param detailsLst
 	 */
-	public void getDetailByFile(Object obj, String as_Filename, List a_Lst) {
+	public void getDetailByFile(Object obj, String fileName, List detailsLst) {
 		checkDirExist(localInpath);
 		if(obj instanceof RateInfo   ) {
-			getRateDetailByFile((RateInfo)obj, as_Filename, a_Lst);
+			getRateDetailByFile((RateInfo)obj, fileName, detailsLst);
 		}else if(obj instanceof Loan) {
-			getLoanDetailByFile((Loan)obj, as_Filename, a_Lst);
+			getLoanDetailByFile((Loan)obj, fileName, detailsLst);
 		}else if(obj instanceof Deposit) {
-			getDepositDetailByFile((Deposit)obj, as_Filename, a_Lst);
+			getDepositDetailByFile((Deposit)obj, fileName, detailsLst);
 		}
 
 	}
@@ -202,40 +215,40 @@ public class CommonUtils {
 	 * Decompose reply file for product ID
 	 * 
 	 * 
-	 * @param a_ProdLst
-	 * @param as_Filename
+	 * @param prodLst
+	 * @param fileName
 	 * @param obj
 	 */
-	public void getProdsByFile(List a_ProdLst, String as_Filename, Object obj) {
+	public void getProdsByFile(List prodLst, String fileName, Object obj) {
 		CSVReader reader = null;
-		String[] ls_NextLine;
+		String[] nextLine;
 		try{
-			String ls_localInpath = null;
+			String localInpathString = null;
 			checkDirExist(localInpath);
 			if(!localInpath.endsWith(File.separator)) {
-				ls_localInpath = localInpath + File.separator + as_Filename + "." + remoteInFileConv;
+				localInpathString = localInpath + File.separator + fileName + "." + remoteInFileConv;
 			}else {
-				ls_localInpath = localInpath + as_Filename + "." + remoteInFileConv;;
+				localInpathString = localInpath + fileName + "." + remoteInFileConv;;
 			}
-			LOGGER.info("ls_localInpath " + ls_localInpath);
+			LOGGER.info("localInpathString " + localInpathString);
 			
-			//reader = new CSVReader(new FileReader(ls_localInpath));
+			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
-			reader = new CSVReaderBuilder(new FileReader(ls_localInpath)).withCSVParser(rfc4180Parser).build();
-			while((ls_NextLine=reader.readNext()) != null) {
-				LOGGER.info("ls_NextLine.length : " +ls_NextLine.length);
+			reader = new CSVReaderBuilder(new FileReader(localInpathString)).withCSVParser(rfc4180Parser).build();
+			while((nextLine=reader.readNext()) != null) {
+				LOGGER.info("nextLine.length : " +nextLine.length);
 				if(obj instanceof Loan) {
-					((Loan) obj).setProdId(ls_NextLine[0]);
-					a_ProdLst.add(obj);
+					((Loan) obj).setProdId(nextLine[0]);
+					prodLst.add(obj);
 					obj = new Loan();
 				}else if (obj instanceof Deposit) {
-					((Deposit) obj).setProdId(ls_NextLine[0]);
-					a_ProdLst.add(obj);
+					((Deposit) obj).setProdId(nextLine[0]);
+					prodLst.add(obj);
 					obj = new Deposit();
 				}
 			}
 		}catch(FileNotFoundException ex) {
-			LOGGER.error("File " + as_Filename +" not found!" );
+			LOGGER.error("File " + fileName +" not found!" );
 			return;
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -255,59 +268,59 @@ public class CommonUtils {
 	 * Decompose reply file for Deposit details
 	 * 
 	 * @param info
-	 * @param as_Filename
-	 * @param a_Lst
+	 * @param fileName
+	 * @param detailsLst
 	 */
-	public void getDepositDetailByFile(Deposit info, String as_Filename, List a_Lst) {
+	public void getDepositDetailByFile(Deposit info, String fileName, List detailsLst) {
 		
 		CSVReader reader = null;
-		String[] ls_NextLine;
+		String[] nextLine;
 		try{
-			String ls_localInpath = null;
+			String localInpathString = null;
 			if(!localInpath.endsWith(File.separator)) {
-				ls_localInpath = localInpath + File.separator + as_Filename + "." + remoteInFileConv;;
+				localInpathString = localInpath + File.separator + fileName + "." + remoteInFileConv;;
 			}else {
-				ls_localInpath = localInpath + as_Filename + "." + remoteInFileConv;;
+				localInpathString = localInpath + fileName + "." + remoteInFileConv;;
 			}
-			LOGGER.info("ls_localInpath " + ls_localInpath);
-			//reader = new CSVReader(new FileReader(ls_localInpath));
+			LOGGER.info("localInpathString " + localInpathString);
+			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
-			reader = new CSVReaderBuilder(new FileReader(ls_localInpath)).withCSVParser(rfc4180Parser).build();
-			while((ls_NextLine=reader.readNext()) != null) {
-				LOGGER.info("ls_NextLine.length : " +ls_NextLine.length);
+			reader = new CSVReaderBuilder(new FileReader(localInpathString)).withCSVParser(rfc4180Parser).build();
+			while((nextLine=reader.readNext()) != null) {
+				LOGGER.info("nextLine.length : " +nextLine.length);
 				//info
 				if(info.getProdId() == null) {
-					info.setProdId(ls_NextLine[0]);
+					info.setProdId(nextLine[0]);
 				}
-				if (ls_NextLine.length > 2) {
-					info.setProduct(ls_NextLine[1]);
+				if (nextLine.length > 2) {
+					info.setProduct(nextLine[1]);
 				}
-				if (ls_NextLine.length > 2) {
-					info.setType(ls_NextLine[2]);
+				if (nextLine.length > 2) {
+					info.setType(nextLine[2]);
 				}
-				if (ls_NextLine.length > 3) {
-					info.setSubtype(ls_NextLine[3]);
+				if (nextLine.length > 3) {
+					info.setSubtype(nextLine[3]);
 				}
-				if (ls_NextLine.length > 4) {
-					info.setCurrency(ls_NextLine[4]);
+				if (nextLine.length > 4) {
+					info.setCurrency(nextLine[4]);
 				}
-				if (ls_NextLine.length > 5) {
-					info.setInterestRate(ls_NextLine[5]);
+				if (nextLine.length > 5) {
+					info.setInterestRate(nextLine[5]);
 				}
-				if (ls_NextLine.length > 6) {
-					info.setMinamount(ls_NextLine[6]);
+				if (nextLine.length > 6) {
+					info.setMinamount(nextLine[6]);
 				}
-				if (ls_NextLine.length > 7) {
-					info.setFee(ls_NextLine[7]);
+				if (nextLine.length > 7) {
+					info.setFee(nextLine[7]);
 				}
-				if (ls_NextLine.length > 8) {
-					info.setRemark(removeLFChar(ls_NextLine[8]));
+				if (nextLine.length > 8) {
+					info.setRemark(removeLFChar(nextLine[8]));
 				}
-				a_Lst.add(info);
+				detailsLst.add(info);
 				info = new Deposit();
 			}
 		}catch(FileNotFoundException ex) {
-			LOGGER.error("File " + as_Filename +" not found!" );
+			LOGGER.error("File " + fileName +" not found!" );
 			return;
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -326,61 +339,61 @@ public class CommonUtils {
 	 * Decompose reply file for Loan details
 	 * 
 	 * @param info
-	 * @param as_Filename
-	 * @param a_Lst
+	 * @param fileName
+	 * @param detailsLst
 	 */
-	public void getLoanDetailByFile(Loan info, String as_Filename, List a_Lst) {
+	public void getLoanDetailByFile(Loan info, String fileName, List detailsLst) {
 		
 		CSVReader reader = null;
-		String[] ls_NextLine;
+		String[] nextLine;
 		try{
-			String ls_localInpath = null;
+			String localInpathString = null;
 			if(!localInpath.endsWith(File.separator)) {
-				ls_localInpath = localInpath + File.separator + as_Filename + "." + remoteInFileConv;;
+				localInpathString = localInpath + File.separator + fileName + "." + remoteInFileConv;;
 			}else {
-				ls_localInpath = localInpath + as_Filename + "." + remoteInFileConv;;
+				localInpathString = localInpath + fileName + "." + remoteInFileConv;;
 			}
-			LOGGER.info("ls_localInpath " + ls_localInpath);
-			//reader = new CSVReader(new FileReader(ls_localInpath));
+			LOGGER.info("localInpathString " + localInpathString);
+			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
-			reader = new CSVReaderBuilder(new FileReader(ls_localInpath)).withCSVParser(rfc4180Parser).build();
-			while((ls_NextLine=reader.readNext()) != null) {
-				LOGGER.info("ls_NextLine.length : " +ls_NextLine.length);
+			reader = new CSVReaderBuilder(new FileReader(localInpathString)).withCSVParser(rfc4180Parser).build();
+			while((nextLine=reader.readNext()) != null) {
+				LOGGER.info("nextLine.length : " +nextLine.length);
 				if(info.getProdId() == null) {
-					info.setProdId(ls_NextLine[0]);
+					info.setProdId(nextLine[0]);
 				}
-				if (ls_NextLine.length > 1) {
-					info.setProduct(ls_NextLine[1]);
+				if (nextLine.length > 1) {
+					info.setProduct(nextLine[1]);
 				}
-				if (ls_NextLine.length > 2) {
-					info.setType(ls_NextLine[2]);
+				if (nextLine.length > 2) {
+					info.setType(nextLine[2]);
 				}
-				if (ls_NextLine.length > 3) {
-					info.setSubtype(ls_NextLine[3]);
+				if (nextLine.length > 3) {
+					info.setSubtype(nextLine[3]);
 				}
-				if (ls_NextLine.length > 4) {
-					info.setInterestRate(ls_NextLine[4]);
+				if (nextLine.length > 4) {
+					info.setInterestRate(nextLine[4]);
 				}
-				if (ls_NextLine.length > 5) {
-					info.setPrdinfo1(removeLFChar(ls_NextLine[5]));
+				if (nextLine.length > 5) {
+					info.setPrdinfo1(removeLFChar(nextLine[5]));
 				}
-				if (ls_NextLine.length > 6) {
-					info.setPrdinfo2(removeLFChar(ls_NextLine[6]));
+				if (nextLine.length > 6) {
+					info.setPrdinfo2(removeLFChar(nextLine[6]));
 				}
-				if (ls_NextLine.length > 7) {
-					info.setPrdinfo3(removeLFChar(ls_NextLine[7]));
+				if (nextLine.length > 7) {
+					info.setPrdinfo3(removeLFChar(nextLine[7]));
 				}
-				if (ls_NextLine.length > 8) {
-					info.setFee(ls_NextLine[8]);
+				if (nextLine.length > 8) {
+					info.setFee(nextLine[8]);
 				}
-				if (ls_NextLine.length > 9) {
-					info.setRemark(removeLFChar(ls_NextLine[9]));
+				if (nextLine.length > 9) {
+					info.setRemark(removeLFChar(nextLine[9]));
 				}
-				a_Lst.add(info);
+				detailsLst.add(info);
 				info = new Loan();
 			}
 		}catch(FileNotFoundException ex) {
-			LOGGER.error("File " + as_Filename +" not found!" );
+			LOGGER.error("File " + fileName +" not found!" );
 			return;
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -399,53 +412,53 @@ public class CommonUtils {
 	 * Decompose reply file for Rate details
 	 * 
 	 * @param info
-	 * @param as_Filename
-	 * @param a_Lst
+	 * @param fileName
+	 * @param detailsLst
 	 */
-	public void getRateDetailByFile(RateInfo info, String as_Filename, List a_Lst) {
+	public void getRateDetailByFile(RateInfo info, String fileName, List detailsLst) {
 		
 		CSVReader reader = null;
-		String[] ls_NextLine;
+		String[] nextLine;
 		try{
-			String ls_localInpath = null;
+			String localInpathString = null;
 			if(!localInpath.endsWith(File.separator)) {
-				ls_localInpath = localInpath + File.separator + as_Filename + "." + remoteInFileConv;;
+				localInpathString = localInpath + File.separator + fileName + "." + remoteInFileConv;;
 			}else {
-				ls_localInpath = localInpath + as_Filename + "." + remoteInFileConv;;
+				localInpathString = localInpath + fileName + "." + remoteInFileConv;;
 			}
-			LOGGER.info("ls_localInpath " + ls_localInpath);
-			//reader = new CSVReader(new FileReader(ls_localInpath));
+			LOGGER.info("localInpathString " + localInpathString);
+			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
-			reader = new CSVReaderBuilder(new FileReader(ls_localInpath)).withCSVParser(rfc4180Parser).build();
-			String ls_Ccy = info.getCcy_Cde();
-			String ls_RelvtCcy = info.getRelvt_Ccy_Cde();
-			while((ls_NextLine=reader.readNext()) != null) {
-				LOGGER.info("ls_NextLine.length : " +ls_NextLine.length);
+			reader = new CSVReaderBuilder(new FileReader(localInpathString)).withCSVParser(rfc4180Parser).build();
+			String ccy = info.getCcyCde();
+			String relvtCcy = info.getRelvtCcyCde();
+			while((nextLine=reader.readNext()) != null) {
+				LOGGER.info("nextLine.length : " +nextLine.length);
 				//info
-				if(info.getCcy_Cde() == null) {
-					info.setCcy_Cde(ls_Ccy);
-					info.setRelvt_Ccy_Cde(ls_RelvtCcy);
+				if(info.getCcyCde() == null) {
+					info.setCcyCde(ccy);
+					info.setRelvtCcyCde(relvtCcy);
 				}
-				if (ls_NextLine.length > 1) {
-					info.setBid(new BigDecimal(ls_NextLine[1]));
+				if (nextLine.length > 1) {
+					info.setBid(new BigDecimal(nextLine[1]));
 				}
-				if (ls_NextLine.length > 2) {
-					info.setMid(new BigDecimal(ls_NextLine[2]));
+				if (nextLine.length > 2) {
+					info.setMid(new BigDecimal(nextLine[2]));
 				}
-				if (ls_NextLine.length > 3) {
-					info.setAsk(new BigDecimal(ls_NextLine[3]));
+				if (nextLine.length > 3) {
+					info.setAsk(new BigDecimal(nextLine[3]));
 				}
-				if (ls_NextLine.length > 4) {
-					info.setFeed_Source(ls_NextLine[4]);
+				if (nextLine.length > 4) {
+					info.setFeedSource(nextLine[4]);
 				}
-				if (ls_NextLine.length > 5) {
-					info.setLastDate(ls_NextLine[5]);
+				if (nextLine.length > 5) {
+					info.setLastDate(nextLine[5]);
 				}
-				a_Lst.add(info);
+				detailsLst.add(info);
 				info = new RateInfo();
 			}
 		}catch(FileNotFoundException ex) {
-			LOGGER.error("File " + as_Filename +" not found!" );
+			LOGGER.error("File " + fileName +" not found!" );
 			return;
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -467,11 +480,11 @@ public class CommonUtils {
 		if (e instanceof JSchException) {
 			LOGGER.error("login or connect error. error message: " + msg);
 			if(msg != null) {
-				if (msg.contains("Auth fail")) {
+				if (msg.contains(DemoConstants.AUTH_FAIL)) {
 					errMsg = "ftp login failed";
-				}else if (msg.contains("Connection timed out") || msg.contains("timeout:")) {
+				}else if (msg.contains(DemoConstants.CONN_TIMED_OUT) || msg.contains(DemoConstants.TIME_OUT)) {
 					errMsg = "ftp Connection timed out";
-				}else if (msg.contains("Connection refused")) {
+				}else if (msg.contains(DemoConstants.CONN_REFUSED)) {
 					errMsg = "ftp Connection refused";
 				}else {
 					errMsg = "ftp Connection Exception";
@@ -498,58 +511,57 @@ public class CommonUtils {
 	public  Object responseFtpError(Object obj){
 		return responseFtpError(null, obj);
 	}
-	public Object responseFtpError(String as_Prod , Object obj){
+	public Object responseFtpError(String prod , Object obj){
 		try {
-			if(StringUtils.isEmpty(as_Prod)) {
+			if(StringUtils.isEmpty(prod)) {
 				return interfaceFileProcess.getDetails(obj);
 			} else {
-				return interfaceFileProcess.getProds(as_Prod,obj);
+				return interfaceFileProcess.getProds(prod,obj);
 			}
 		} catch (SftpException e) {
-			Map<String, String> map = new HashMap<String, String>();
+			Map<String, String> map = new HashMap<String, String>(1);
 			map.put("error", e.getMessage());
 			LOGGER.error("responseFtpError " +  e.getMessage());
 			return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	public String removeLFChar(String as_Str) {
-		String ls_Str = as_Str;
-		if(as_Str.contains("\r\n")) {
-			ls_Str = as_Str.replaceAll(" \r\n", " ");
-			ls_Str = ls_Str.replaceAll("\r\n", " ");
-		}else if(as_Str.contains("\n")) {
-			ls_Str = as_Str.replaceAll(" \n", " ");
-			ls_Str = ls_Str.replaceAll("\n", " ");
+	public String removeLFChar(String strParam) {
+		String strLine = strParam;
+		if(strParam.contains(DemoConstants.LINE_BREAK)) {
+			strLine = strParam.replaceAll(" \r\n", " ");
+			strLine = strLine.replaceAll("\r\n", " ");
+		}else if(strParam.contains(DemoConstants.NEW_LINE)) {
+			strLine = strParam.replaceAll(" \n", " ");
+			strLine = strLine.replaceAll("\n", " ");
 		}
-		return ls_Str;
+		return strLine;
 	}
 
-	public List<String> getFieldDescList(String as_Product){
+	public List<String> getFieldDescList(String product){
 
-		List<FieldMapping> listResult = fieldMappingService.findAllByProductAndShowOrderByOrder(as_Product, true);
+		List<FieldMapping> listResult = fieldMappingService.findAllByProductAndShowOrderByOrder(product, true);
 
 		List<String> fieldNameLst = new ArrayList<String>();
 		for (FieldMapping fieldMapping: listResult
 		) {
-			//fieldNameLst.add(fieldMapping.getField());
 			fieldNameLst.add(fieldMapping.getFieldDesc());
 		}
 
 		return fieldNameLst;
 	}
 
-	public String getFieldDesc(String as_Product){
-		String ls_Content="";
-		List<String>  fieldDescLst = getFieldDescList(as_Product);
+	public String getFieldDesc(String product){
+		String content="";
+		List<String>  fieldDescLst = getFieldDescList(product);
 		for (int i = 0; i < fieldDescLst.size(); i++) {
-			String ls_fieldDesc = fieldDescLst.get(i);
+			String fieldDesc = fieldDescLst.get(i);
 			if(i != fieldDescLst.size() - 1) {
-				ls_Content += ls_fieldDesc + fileDelimiter;
+				content += fieldDesc + fileDelimiter;
 			} else {
-				ls_Content += ls_fieldDesc;
+				content += fieldDesc;
 			}
 		}
-		return ls_Content;
+		return content;
 	}
 }

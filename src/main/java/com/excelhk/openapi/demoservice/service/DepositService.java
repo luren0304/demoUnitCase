@@ -3,51 +3,63 @@ package com.excelhk.openapi.demoservice.service;
 import com.excelhk.openapi.demoservice.bean.Deposit;
 import com.excelhk.openapi.demoservice.repository.DepositRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Field;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-//import org.springframework.data.mongodb.core.query.BasicQuery;
-//import org.springframework.data.mongodb.core.query.Criteria;
+/**
+ * @author anita
+ *
+ */
 
 @Service
 public class DepositService {
 
     @Autowired
     private DepositRepository depositRepository;
-    private MongoTemplate mongo;
 
+    /**
+     *  Create Deposit record
+     *
+     * @param deposit
+     */
     public void  createDeposit(Deposit deposit) {
         depositRepository.save(deposit);
     }
+
+    /**
+     * Batch to create Deposit records
+     *
+     * @param depositLst
+     */
     public void  createDeposit(List<Deposit> depositLst) {
         depositRepository.saveAll(depositLst);
     }
 
-    public List<Deposit> findByProdId(String as_ProdId) {
-        return depositRepository.findByProdId(as_ProdId);
+    /**
+     *
+     * Retrieve record details by product id
+     * @param prodId
+     * @return
+     */
+    public List<Deposit> findByProdId(String prodId) {
+        return depositRepository.findByProdId(prodId);
     }
 
+    /**
+     *  Retrieve all records
+     * @return
+     */
     public List<Deposit> findAll(){
         return depositRepository.findAll();
     }
 
+    /**
+     * Retrieve all product id
+     *
+     * @return
+     */
     public List<Deposit> findAllProdId(){
         return depositRepository.findAllprodId();
     }
-
-    public List<Deposit> findfields(){
-//		Criteria criteria = new Criteria();
-//		Query query = new Query(criteria);
-        Query query = new Query();
-        Field fields = query.fields();
-        fields.include("prodId");
-//		List <Deposit>
-        return mongo.find(query, Deposit.class);
-    }
-
-
 }

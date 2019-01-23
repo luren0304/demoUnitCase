@@ -1,33 +1,42 @@
 package com.excelhk.openapi.demoservice.utils;
 
+/**
+ *
+ * @author anita
+ */
+
 public class IdWorker {
 
-	private final long workerId;
-	private final static long twepoch = 1288834974657L;
+	private final long WORKER_ID;
+	/**
+	 * milliseconds from January 1, 1970
+	 * 2018-10-01
+	 */
+	private final static long TWEPOCH = 1514736000000L;
 	private long sequence = 0L;
-	private final static long workerIdBits = 4L;
-	public final static long maxWorkerId = -1L ^ -1L << workerIdBits;
-	private final static long sequenceBits = 10L;
-	private final static long workerIdShift = sequenceBits;
-	private final static long timestampLeftShift = sequenceBits + workerIdBits;
-	public final static long sequenceMask = -1L ^ -1L << sequenceBits;
+	private final static long WORKER_ID_BITS = 4L;
+	public final static long MAX_WORKER_ID = -1L ^ -1L << WORKER_ID_BITS;
+	private final static long SEQ_BITS = 10L;
+	private final static long WORKER_ID_SHIFT = SEQ_BITS;
+	private final static long  TIMESTAMP_LEFT_SHIFT  = SEQ_BITS + WORKER_ID_BITS;
+	public final static long SEQ_MASK = -1L ^ -1L << SEQ_BITS;
 	private long lastTimestamp = -1L;
 
 	public IdWorker(final long workerId) {
 		super();
-		if (workerId > this.maxWorkerId || workerId < 0) {
+		if (workerId > MAX_WORKER_ID || workerId < 0) {
 			throw new IllegalArgumentException(
-					String.format("worker Id can't be greater than %d or less than 0", this.maxWorkerId));
+					String.format("worker Id can't be greater than %d or less than 0", MAX_WORKER_ID));
 		}
-		this.workerId = workerId;
+		this.WORKER_ID = workerId;
 	}
 
 	public synchronized long nextId() {
 		long timestamp = this.timeGen();
 		if (this.lastTimestamp == timestamp) {
-			this.sequence = (this.sequence + 1) & this.sequenceMask;
+			this.sequence = (this.sequence + 1) & SEQ_MASK;
 			if (this.sequence == 0) {
-				System.out.println("###########" + sequenceMask);
+				System.out.println("###########" + SEQ_MASK);
 				timestamp = this.tilNextMillis(this.lastTimestamp);
 			}
 		} else {
@@ -43,10 +52,8 @@ public class IdWorker {
 		}
 
 		this.lastTimestamp = timestamp;
-		long nextId = ((timestamp - twepoch << timestampLeftShift)) | (this.workerId << this.workerIdShift)
+		long nextId = ((timestamp - TWEPOCH << TIMESTAMP_LEFT_SHIFT)) | (WORKER_ID << WORKER_ID_SHIFT)
 				| (this.sequence);
-//		System.out.println("timestamp:" + timestamp + ",timestampLeftShift:" + timestampLeftShift + ",nextId:" + nextId
-//				+ ",workerId:" + workerId + ",sequence:" + sequence);
 		return nextId;
 	}
 
@@ -61,12 +68,4 @@ public class IdWorker {
 	private long timeGen() {
 		return System.currentTimeMillis();
 	}
-
-//	public static void main(String[] args) {
-//		IdWorker worker2 = new IdWorker(2);
-//		for(int i =0; i < 100; i ++) {
-//		System.out.println(worker2.nextId());
-//		}
-//	}
-
 }

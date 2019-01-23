@@ -7,25 +7,58 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ *
+ * @author anita
+ */
+
 @Service
 public class LoanService {
 
     @Autowired
     private LoanRepository loanRepository;
-    public void  createLoan(Loan Loan) {
-        loanRepository.save(Loan);
+
+    /**
+     * Create a loan record
+     * @param loan
+     */
+    public void  createLoan(Loan loan) {
+        loanRepository.save(loan);
 
     }
-    public void  createLoan(List<Loan> LoanLst) {
-        loanRepository.saveAll(LoanLst);
+
+    /**
+     *
+     * Batch to create loan records
+     * @param loanLst
+     */
+    public void  createLoan(List<Loan> loanLst) {
+        loanRepository.saveAll(loanLst);
     }
 
-    public List<Loan> findByProdId(String as_ProdId) {
-        return loanRepository.findByProdId(as_ProdId);
+    /**
+     *
+     * Retrieve record by product id
+     * @param prodId
+     * @return
+     */
+    public List<Loan> findByProdId(String prodId) {
+        return loanRepository.findByProdId(prodId);
     }
+
+    /**
+     * Retrieve all product id
+     * @return
+     */
     public List<Loan> findAllProdId(){
         return loanRepository.findAllprodId();
     }
+
+    /**
+     *
+     * Retrieve all records
+     * @return
+     */
     public List<Loan> findAll(){
         return loanRepository.findAll();
     }

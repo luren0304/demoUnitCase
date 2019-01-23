@@ -7,17 +7,36 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ *
+ * @author anita
+ *
+ */
+
 @Service
 public class FieldMappingService {
 
     @Autowired
     private FieldMappingRepository  fieldMappingRepository;
 
-    public List<FieldMapping> findFieldMappingByProduct(String as_Product){
-      return fieldMappingRepository.findAllByProductOrderByOrder(as_Product);
+    /**
+     *
+     *  Retrieve field mapping record by product
+     * @param product
+     * @return
+     */
+
+    public List<FieldMapping> findFieldMappingByProduct(String product){
+      return fieldMappingRepository.findAllByProductOrderByOrder(product);
     }
 
-    public List<FieldMapping> findAllByProductAndShowOrderByOrder(String as_Product, boolean ab_show){
-        return fieldMappingRepository.findAllByProductAndShowOrderByOrder(as_Product,ab_show);
+    /**
+     * Retrieve field mapping record by product and show
+     * @param product
+     * @param isShow
+     * @return
+     */
+    public List<FieldMapping> findAllByProductAndShowOrderByOrder(String product, boolean isShow){
+        return fieldMappingRepository.findAllByProductAndShowOrderByOrder(product,isShow);
     }
 }

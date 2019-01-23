@@ -3,6 +3,11 @@ package com.excelhk.openapi.demoservice.bean;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+
+/**
+ * @author anita
+ *
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Document(collection = "loans")
 public class Loan {
@@ -12,7 +17,7 @@ public class Loan {
     private String type;
     private String subtype;
     private String interestRate;
-    //Product Info. 1
+   /** Product Info. 1*/
     private String prdinfo1;
     private String prdinfo2;
     private String prdinfo3;

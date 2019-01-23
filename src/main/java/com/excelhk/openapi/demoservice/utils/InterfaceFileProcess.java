@@ -15,6 +15,11 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @author anita
+ */
+
 @Component
 public class InterfaceFileProcess {
 
@@ -43,78 +48,85 @@ public class InterfaceFileProcess {
 	 * @return
 	 */
 	public List getDetails(Object obj) throws SftpException{
-		List l_Details = new ArrayList();
-		String ls_FileName=null;
+		List details = new ArrayList();
+		String fileName=null;
 		if(obj instanceof RateInfo   ) {
-			ls_FileName = commonUtils.getFileName("exch" + "." + ((RateInfo)obj).getCcy_Cde() + "." + ((RateInfo)obj).getRelvt_Ccy_Cde());
+			fileName = commonUtils.getFileName("exch" + "." + ((RateInfo)obj).getCcyCde() + "." + ((RateInfo)obj).getRelvtCcyCde());
 		}else if (obj instanceof Deposit) {
-			ls_FileName =  commonUtils.getFileName("prod" + "." + ((Deposit)obj).getProduct() + "." + ((Deposit)obj).getProdId());
+			fileName =  commonUtils.getFileName("prod" + "." + ((Deposit)obj).getProduct() + "." + ((Deposit)obj).getProdId());
 		}else if (obj instanceof Loan) {
-			ls_FileName =  commonUtils.getFileName("prod" + "." + ((Loan)obj).getProduct() + "." + ((Loan)obj).getProdId());
+			fileName =  commonUtils.getFileName("prod" + "." + ((Loan)obj).getProduct() + "." + ((Loan)obj).getProdId());
 		}
 		
-		boolean success = commonUtils.generateFile(ls_FileName, obj );
+		boolean success = commonUtils.generateFile(fileName, obj );
 		if(success) {
-			// put out file
+			/**
+			 * put out file
+			 */
 			try {
-				interfaceFileFtpProcess.upload(ls_FileName);
+				interfaceFileFtpProcess.upload(fileName);
 			} catch (Exception e) {
 				throw commonUtils.handleErr(e);
 			}
-			//get remote in file
+			/**
+			 * Get remote in file
+			 */
 			logger.info("download file start");
-			success = downloadLoop(ls_FileName);
+			success = downloadLoop(fileName);
 			if(success) {
 				logger.info("download file successfully");
 				logger.info("get file details");
-				commonUtils.getDetailByFile(obj, ls_FileName, l_Details);
+				commonUtils.getDetailByFile(obj, fileName, details);
 			}
 			logger.info("download file end");
 		}else {
-			l_Details.add(obj);
+			details.add(obj);
 		}
 		
-		return l_Details;
+		return details;
 	}
 	
 	/**
 	 * Get the product id
 	 * 
-	 * @param as_Prod
+	 * @param product
 	 * @param obj
 	 * @return
 	 */
-	public List getProds(String as_Prod, Object obj) throws SftpException{
-		String ls_FileName = null;
-		String ls_Content = as_Prod;
-		List l_PordLst = new ArrayList();
-		ls_FileName = commonUtils.getFileName("prod"+ "." + as_Prod);
-		boolean success = commonUtils.generateFile(ls_FileName,  ls_Content);
+	public List getProds(String product, Object obj) throws SftpException{
+		String fileName = null;
+		String content = product;
+		List pordLst = new ArrayList();
+		fileName = commonUtils.getFileName("prod"+ "." + product);
+		boolean success = commonUtils.generateFile(fileName,  content);
 		if(success) {
-			// put out file
+			/**
+			 * put out file
+			 */
 			try {
-				interfaceFileFtpProcess.upload(ls_FileName);
+				interfaceFileFtpProcess.upload(fileName);
 			} catch (Exception e) {
 				throw commonUtils.handleErr(e);
 			}
-			
-			//get remote in file
+			/**
+			 * get remote in file
+			 */
 			logger.info("download file start");
-			success = downloadLoop(ls_FileName);
+			success = downloadLoop(fileName);
 			if(success) {
 				logger.info("download file successfully");
 				logger.info("get file details");
-				commonUtils.getProdsByFile(l_PordLst, ls_FileName, obj);
+				commonUtils.getProdsByFile(pordLst, fileName, obj);
 			}
 			logger.info("download file end");
 		}
-		return l_PordLst;
+		return pordLst;
 	}
 
-	private boolean downloadLoop(String as_FileName) throws SftpException {
+	private boolean downloadLoop(String fileName) throws SftpException {
 		boolean success = false;
 		SftpException sftpException = null;
-		FtpFileEvent ftpFileEvent = new FtpFileEvent(this, as_FileName);
+		FtpFileEvent ftpFileEvent = new FtpFileEvent(this, fileName);
 		for(int i = 0; i < loopCnt; i ++) {
 			logger.info("loop i = " + i);
 			try {

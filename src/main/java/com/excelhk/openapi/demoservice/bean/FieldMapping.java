@@ -3,6 +3,10 @@ package com.excelhk.openapi.demoservice.bean;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+/**
+ * @author anita
+ *
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Document(collection = "fieldMapping")
 public class FieldMapping {

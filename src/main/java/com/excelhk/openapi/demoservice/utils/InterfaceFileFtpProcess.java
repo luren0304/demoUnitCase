@@ -9,6 +9,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 
+/**
+ *
+ * @author anita
+ */
 
 @Component
 @ConfigurationProperties(prefix="sftp")
@@ -31,7 +35,7 @@ public class InterfaceFileFtpProcess {
 	private String remoteInFileConv;
 	
 	private static Logger LOGGER = LoggerFactory.getLogger(InterfaceFileFtpProcess.class);
-	private SFTPClientHandler l_sftpClientHandler = null;
+	private SftpClientHandler sftpClientHandler = null;
 	
 
 	
@@ -39,36 +43,36 @@ public class InterfaceFileFtpProcess {
 	 * 
 	 * Upload request file to sftp server
 	 * 
-	 * @param as_FileName
+	 * @param fileName
 	 */
 	
-	public void upload (String as_FileName) throws Exception{
+	public void upload (String fileName) throws Exception{
 		try {
-			as_FileName = as_FileName + "." + remoteOutFileConv;
-			String ls_localOutpath = null;
+			fileName = fileName + "." + remoteOutFileConv;
+			String localOutpathString = null;
 			checkDirExist(localOutpath);
 			if(!localOutpath.endsWith(File.separator)) {
-				ls_localOutpath = localOutpath + File.separator + as_FileName;
+				localOutpathString = localOutpath + File.separator + fileName;
 			}else {
-				ls_localOutpath = localOutpath + as_FileName ;
+				localOutpathString = localOutpath + fileName ;
 			}
-			LOGGER.info("ls_localOutpath " + ls_localOutpath);
+			LOGGER.info("localOutpathString " + localOutpathString);
 				
-			if(l_sftpClientHandler == null) {
-				l_sftpClientHandler = SFTPClientHandler.getInstance(host, port);
+			if(sftpClientHandler == null) {
+				sftpClientHandler = SftpClientHandler.getInstance(host, port);
 			}
-			l_sftpClientHandler.debugResponses(true);
-			l_sftpClientHandler.login(user, password);
-			l_sftpClientHandler.chdir(remoteOutpath);
-			l_sftpClientHandler.put(ls_localOutpath, as_FileName);
+			sftpClientHandler.debugResponses(true);
+			sftpClientHandler.login(user, password);
+			sftpClientHandler.chdir(remoteOutpath);
+			sftpClientHandler.put(localOutpathString, fileName);
 		} catch (Exception e) {
 			LOGGER.error("upload file failed. error message: " + e.getMessage() );
 			e.printStackTrace();
 			throw e;
 		}finally {
-			if(l_sftpClientHandler != null) {
+			if(sftpClientHandler != null) {
 				try {
-					l_sftpClientHandler.quit();
+					sftpClientHandler.quit();
 				} catch (Exception e) {
 				}
 			}
@@ -79,39 +83,43 @@ public class InterfaceFileFtpProcess {
 	/**
 	 * Download reply file from SFTP server
 	 *
-	 * @param as_FileName
+	 * @param fileName
 	 * @return
 	 */
-	public boolean download(String as_FileName) throws Exception{
+	public boolean download(String fileName) throws Exception{
 		try {
-			as_FileName = as_FileName + "." + remoteInFileConv;
-			String ls_localInpath = null;
+			fileName = fileName + "." + remoteInFileConv;
+			String localInpathString = null;
 			checkDirExist(localInpath);
 			if(!localInpath.endsWith(File.separator)) {
-				ls_localInpath = localInpath + File.separator + as_FileName;
+				localInpathString = localInpath + File.separator + fileName;
 			}else {
-				ls_localInpath = localInpath + as_FileName ;
+				localInpathString = localInpath + fileName ;
 			}
-			LOGGER.info("ls_localInpath " + ls_localInpath);
+			LOGGER.info("localInpathString " + localInpathString);
 			
-			if(l_sftpClientHandler == null) {
-				l_sftpClientHandler = SFTPClientHandler.getInstance(host, port);
+			if(sftpClientHandler == null) {
+				sftpClientHandler = SftpClientHandler.getInstance(host, port);
 			}
-			l_sftpClientHandler.debugResponses(true);
-			l_sftpClientHandler.login(user, password);
-			l_sftpClientHandler.chdir(remoteInpath);
-			String [] sFileList = l_sftpClientHandler.dir(as_FileName);
-			//check file exist
+			sftpClientHandler.debugResponses(true);
+			sftpClientHandler.login(user, password);
+			sftpClientHandler.chdir(remoteInpath);
+			String [] sFileList = sftpClientHandler.dir(fileName);
+			/**
+			 * check file exist
+			 */
 			if(sFileList.length > 0) {
-				//file exist
-				l_sftpClientHandler.get(ls_localInpath, as_FileName);
+				/**
+				 * file exist
+				 */
+				sftpClientHandler.get(localInpathString, fileName);
 				LOGGER.info("The remote file download successfully.");
 				LOGGER.info("Rename the remote file start");
-				l_sftpClientHandler.rename(as_FileName, as_FileName.substring(0, as_FileName.lastIndexOf(".")) + ".bak" );
+				sftpClientHandler.rename(fileName, fileName.substring(0, fileName.lastIndexOf(".")) + ".bak" );
 				LOGGER.info("Rename the remote file successfully End");
 				return true;
 			}else {
-				LOGGER.info("The remote file doesn't exist. File Name: " + as_FileName);
+				LOGGER.info("The remote file doesn't exist. File Name: " + fileName);
 				return false;
 			}
 		} catch (Exception e) {
@@ -119,23 +127,25 @@ public class InterfaceFileFtpProcess {
 			e.printStackTrace();
 			throw e;
 		}finally {
-			if(l_sftpClientHandler != null) {
+			if(sftpClientHandler != null) {
 				try {
-					l_sftpClientHandler.quit();
+					sftpClientHandler.quit();
 				} catch (Exception e) {
 				}
 			}
 		}
 	}
 	
+
 	/**
 	 * check if directory exists, if not, create it.
+	 * @param dir
 	 */
-	public void checkDirExist(String as_Dir) {
-		LOGGER.info("as_Dir " + as_Dir);
-		File filedir = new File(as_Dir);
-		if(!filedir.exists()) {
-			filedir.mkdirs();
+	public void checkDirExist(String dir) {
+		LOGGER.info("dir " + dir);
+		File fileDir = new File(dir);
+		if(!fileDir.exists()) {
+			fileDir.mkdirs();
 		}
 	}
 

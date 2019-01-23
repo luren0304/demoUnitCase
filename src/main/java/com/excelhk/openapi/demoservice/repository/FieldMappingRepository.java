@@ -6,10 +6,25 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @author anita
+ */
+
 @Repository
 public interface FieldMappingRepository extends MongoRepository<FieldMapping,String> {
 
-    public List<FieldMapping> findAllByProductOrderByOrder(String as_product);
+    /**
+     * Retrieve all records by product and order fields and sort by order
+     * @param product
+     * @return
+     */
+    public List<FieldMapping> findAllByProductOrderByOrder(String product);
 
-    public List<FieldMapping> findAllByProductAndShowOrderByOrder(String as_Product, boolean ab_isShow);
+    /**
+     *    Retrieve all records by product and show fields and sort by order
+     * @param product
+     * @param isShow
+     * @return
+     */
+    public List<FieldMapping> findAllByProductAndShowOrderByOrder(String product, boolean isShow);
 }

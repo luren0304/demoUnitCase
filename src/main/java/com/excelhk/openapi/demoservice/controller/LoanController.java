@@ -4,6 +4,7 @@ import com.excelhk.openapi.demoservice.bean.Loan;
 import com.excelhk.openapi.demoservice.service.LoanService;
 import com.excelhk.openapi.demoservice.utils.CommonUtils;
 import com.excelhk.openapi.demoservice.utils.constants.DemoConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * @author anita
+ */
 @RestController
 @RequestMapping("/loans")
 public class LoanController {
@@ -20,35 +24,33 @@ public class LoanController {
 	@Autowired
 	private CommonUtils commonUtils;
 
-
-
     @RequestMapping(method = RequestMethod.POST, value="/createObj")
-    public boolean createObj(Loan Loan) {
+    public boolean createObj(Loan loan) {
         logger.info("createObj start");
-        loanService.createLoan(Loan);
+        loanService.createLoan(loan);
         logger.info("createObj End");
         return true;
     }
 
     @RequestMapping(method = RequestMethod.POST, value="/createObjList")
-    public boolean createObjList(@RequestBody List<Loan> LoanLst) {
+    public boolean createObjList(@RequestBody List<Loan> loanLst) {
         logger.info("createObjList start");
-        loanService.createLoan(LoanLst);
+        loanService.createLoan(loanLst);
         logger.info("createObjList End");
         return true;
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/findone/prodid/{prodid}")
-	public Object findByProdId(@PathVariable("prodid") String as_ProdId, @RequestHeader(value = DemoConstants.REQUEST_TOKEN_HEADER, required = false) String as_ConnType) {
-        logger.info("findByProdId" + as_ProdId);
-		logger.info("as_ConnType " + as_ConnType);
-		if(as_ConnType != null && as_ConnType.equalsIgnoreCase("ftp")) {
+	public Object findByProdId(@PathVariable("prodid") String prodId, @RequestHeader(value = DemoConstants.REQUEST_TOKEN_HEADER, required = false) String connType) {
+        logger.info("findByProdId" + prodId);
+		logger.info("connType " + connType);
+        if(StringUtils.isNotEmpty(connType) && DemoConstants.CONNECT_TYPE_FTP.equalsIgnoreCase(connType)) {
 			Loan loan = new Loan();
-			loan.setProdId(as_ProdId);
-			loan.setProduct("Loans");
+			loan.setProdId(prodId);
+			loan.setProduct(DemoConstants.PROD_TYPE_LOANS);
 			return commonUtils.responseFtpError(loan);
 		}else {
-			return loanService.findByProdId(as_ProdId);
+			return loanService.findByProdId(prodId);
 		}
     }
 
@@ -59,11 +61,11 @@ public class LoanController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/findProd")
-	public Object findAllProd(@RequestHeader(value = DemoConstants.REQUEST_TOKEN_HEADER, required = false) String as_ConnType) {
+	public Object findAllProd(@RequestHeader(value = DemoConstants.REQUEST_TOKEN_HEADER, required = false) String connType) {
         logger.info("findAllProd");
-		logger.info("as_ConnType " + as_ConnType);
-		if(as_ConnType != null && as_ConnType.equalsIgnoreCase("ftp")) {
-			return commonUtils.responseFtpError("Loans", new Loan());
+		logger.info("connType " + connType);
+        if(StringUtils.isNotEmpty(connType) && DemoConstants.CONNECT_TYPE_FTP.equalsIgnoreCase(connType)) {
+			return commonUtils.responseFtpError(DemoConstants.PROD_TYPE_LOANS, new Loan());
 		}else {
 			return loanService.findAllProdId();
 		}

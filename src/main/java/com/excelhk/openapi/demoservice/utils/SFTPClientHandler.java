@@ -1,7 +1,9 @@
 package com.excelhk.openapi.demoservice.utils;
 
+import com.excelhk.openapi.demoservice.utils.constants.DemoConstants;
 import com.jcraft.jsch.*;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,342 +13,352 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
-public class SFTPClientHandler {
+
+/**
+ *
+ * @author anita
+ */
+public class SftpClientHandler {
 
 	
-	private ChannelSftp v_sFTPClient = null;
-	private static int vi_port = 22;
-	private static JSch v_jsch = null;	
-	private Session v_sshSession = null;
-	private Channel v_channel = null;
-	private static String vs_hostName;
-	private static Logger LOGGER = LoggerFactory.getLogger(SFTPClientHandler.class);
+	private ChannelSftp sftpClient = null;
+	private static int port = 22;
+	private static JSch jsch = null;	
+	private Session sshSession = null;
+	private Channel channel = null;
+	private static String hostName;
+	private static Logger LOGGER = LoggerFactory.getLogger(SftpClientHandler.class);
 
-	public static SFTPClientHandler getInstance(String as_hostname) throws Exception{
-		LOGGER.info("Create SFTPClientHandler " + as_hostname);
-		vs_hostName = as_hostname;			
-		v_jsch = new JSch();
-		return new SFTPClientHandler();
+	public static SftpClientHandler getInstance(String hostNameParam) throws Exception{
+		LOGGER.info("Create SftpClientHandler " + hostNameParam);
+		hostName = hostNameParam;
+		jsch = new JSch();
+		return new SftpClientHandler();
+	}
+
+	public static SftpClientHandler getInstance(String hostNameParam, int portParam) throws Exception{
+		port = portParam;
+		return getInstance(hostNameParam);
 	}
 	
-	public static SFTPClientHandler getInstance(String as_hostname, int ai_port) throws Exception{
-		vi_port = ai_port;
-		return getInstance(as_hostname);
+	public void chdir(String dstPath) throws Exception{
+		sftpClient.cd(dstPath);
 	}
 	
-	public void chdir(String as_dstpath) throws Exception{
-		v_sFTPClient.cd(as_dstpath);
-	}
-	
-	public void mkdir(String as_dirPath) throws IOException, SftpException{
+	public void mkdir(String dirPath) throws IOException, SftpException{
 		try{
-			v_sFTPClient.mkdir(as_dirPath);
-		}catch(SftpException le_ex){
-			le_ex.printStackTrace();
-			throw le_ex;
+			sftpClient.mkdir(dirPath);
+		}catch(SftpException ex){
+			ex.printStackTrace();
+			throw ex;
 		}
 	}
 	
-	public void delete(String as_outDest) throws IOException, SftpException{
+	public void delete(String outDest) throws IOException, SftpException{
 		try{
-			v_sFTPClient.rm(as_outDest);
-		}catch(SftpException le_ex){
-			le_ex.printStackTrace();
-			throw le_ex;
+			sftpClient.rm(outDest);
+		}catch(SftpException ex){
+			ex.printStackTrace();
+			throw ex;
 		}
 	}	
 	
-	public void rmdir(String as_outDest) throws IOException, SftpException{
+	public void rmdir(String outDest) throws IOException, SftpException{
 		try{
-			v_sFTPClient.rmdir(as_outDest);
-		}catch(SftpException le_ex){
-			le_ex.printStackTrace();
-			throw le_ex;
+			sftpClient.rmdir(outDest);
+		}catch(SftpException ex){
+			ex.printStackTrace();
+			throw ex;
 		}
 	}
 
-	public void debugResponses(boolean as_dRes) throws Exception{
-		if (as_dRes == true){
+	public void debugResponses(boolean debugRes) throws Exception{
+		if (debugRes == true){
 			JSch.setLogger(new DebugLogger());
 		}else{
 			JSch.setLogger(null);
 		}
 	}
 
-	public void login(String as_userName, String as_password) throws Exception{
-		this.login(as_userName, as_password, vi_port);
+	public void login(String userName, String password) throws Exception{
+		this.login(userName, password, port);
 	}
 
-	public void put(String as_outFile, String as_fileName, boolean ab_mode) throws IOException, SftpException{
-		int li_mode = ab_mode ? ChannelSftp.APPEND : ChannelSftp.OVERWRITE;
+	public void put(String outFile, String fileName, boolean modeParam) throws IOException, SftpException{
+		int mode = modeParam ? ChannelSftp.APPEND : ChannelSftp.OVERWRITE;
 		try{
-			File lf_file = new File(as_outFile);
-			FileInputStream lfo_file = new FileInputStream(lf_file);
-			v_sFTPClient.put(lfo_file, as_fileName, li_mode);
+			File file = new File(outFile);
+			FileInputStream fileInputStream = new FileInputStream(file);
+			sftpClient.put(fileInputStream, fileName, mode);
 			try{
-				lfo_file.close();
-			}catch(Exception le_ex){	
+				fileInputStream.close();
+			}catch(Exception ex){	
 			}
-		}catch(SftpException le_ex){
-			le_ex.printStackTrace();
-			throw le_ex;
+		}catch(SftpException ex){
+			ex.printStackTrace();
+			throw ex;
 		}
 	}
 	
-	public void put(String as_outFile, String as_fileName) throws IOException, SftpException{
-		this.put(as_outFile, as_fileName, false);
+	public void put(String outFile, String fileName) throws IOException, SftpException{
+		this.put(outFile, fileName, false);
 	}
 	
-	public void get(String as_inFile, String as_fileName) throws Exception{
-		File lf_file = new File(as_inFile);
-		FileOutputStream lfo_file = new FileOutputStream(lf_file);
-		v_sFTPClient.get(as_fileName, lfo_file);
+	public void get(String inFile, String fileName) throws Exception{
+		File file = new File(inFile);
+		FileOutputStream fileOutputStream = new FileOutputStream(file);
+		sftpClient.get(fileName, fileOutputStream);
 		try{
-			lfo_file.close();
-		}catch(Exception le_ex){	
+			fileOutputStream.close();
+		}catch(Exception ex){	
 		}
 	}
 	
-	public String[] dir(String as_tag) throws Exception{
+	public String[] dir(String tag) throws Exception{
 		
-		String[] lsa_fileNameList;
-		Vector lv_allFile = null;
-		String ls_split = ",";
-		String ls_fielNameList = "";
+		String[] fileNameList;
+		Vector allFile = null;
+		String splitDelimiter = ",";
+		String fielNameString = "";
 		
-		if ((as_tag.indexOf("/") >= 0) || (as_tag.indexOf("\\") >= 0)){
-			lv_allFile = v_sFTPClient.ls(as_tag);
-			as_tag = "*.*";
+		if ((tag.indexOf(DemoConstants.SLASH) >= 0) || (tag.indexOf(DemoConstants.BACK_SLASH_SLASH) >= 0)){
+			allFile = sftpClient.ls(tag);
+			tag = "*.*";
 		}else{
-			if ((as_tag != null) && (as_tag.indexOf(".")) < 0){
-				as_tag = as_tag + ".*";
+			if ((tag != null) && (tag.indexOf(DemoConstants.PERIOD)) < 0){
+				tag = tag + ".*";
 			}
 		
-			lv_allFile = v_sFTPClient.ls(".");
+			allFile = sftpClient.ls(".");
 		}
-		for (int li_count=0;li_count < lv_allFile.size();li_count++ ){
-			Object lo_obj = lv_allFile.elementAt(li_count);			
-			if(lo_obj instanceof LsEntry){
-				LsEntry lo_entry = (LsEntry)lo_obj;
-				String ls_tmpFileName = lo_entry.getFilename();				               
-                if ((ls_tmpFileName == null) || (ls_tmpFileName.equals("")) 
-                		|| (ls_tmpFileName.equals(".")) || (ls_tmpFileName.equals(".."))){
+		for (int count=0;count < allFile.size();count++ ){
+			Object obj = allFile.elementAt(count);			
+			if(obj instanceof LsEntry){
+				LsEntry entry = (LsEntry)obj;
+				String tmpFileName = entry.getFilename();				               
+                if (StringUtils.isEmpty(tmpFileName)
+                		|| (".".equals(tmpFileName)) || ("..".equals(tmpFileName))){
                 	continue;
                 }
 
                 //List all files
-                if ((as_tag.equals("*")) || (as_tag.equals("*.*"))){
-                	if ((ls_fielNameList == null) || (ls_fielNameList.equals(""))){
-                		ls_fielNameList = ls_tmpFileName;
+                if (("*".equals(tag)) || ("*.*".equals(tag))){
+                	if (StringUtils.isEmpty(fielNameString)){
+                		fielNameString = tmpFileName;
                 	}else{
-                		ls_fielNameList = ls_fielNameList + ls_split + ls_tmpFileName;
+                		fielNameString = fielNameString + splitDelimiter + tmpFileName;
                 	}
-                } else if (as_tag.indexOf('.')>= 0) {
-                	int li_pos = as_tag.lastIndexOf('.');
-                	String ls_mchPrefix = as_tag;
-                	String ls_mchExt = "";
-                	if (li_pos >= 0){
-                		ls_mchPrefix = as_tag.substring(0, li_pos);                	
-                		ls_mchExt = as_tag.substring(li_pos + 1);
+                } else if (tag.indexOf('.')>= 0) {
+                	int pos = tag.lastIndexOf('.');
+                	String mchPrefix = tag;
+                	String mchExt = "";
+                	if (pos >= 0){
+                		mchPrefix = tag.substring(0, pos);                	
+                		mchExt = tag.substring(pos + 1);
                 	}
                 	
-                	String ls_filePrefix = ls_tmpFileName;
-                	String ls_fileExt = "";
-                	li_pos = ls_tmpFileName.lastIndexOf('.');
-                	if (li_pos >= 0){
-                		ls_filePrefix = ls_tmpFileName.substring(0, li_pos);
-                		ls_fileExt = ls_tmpFileName.substring(li_pos + 1);
+                	String filePrefix = tmpFileName;
+                	String fileExt = "";
+                	pos = tmpFileName.lastIndexOf('.');
+                	if (pos >= 0){
+                		filePrefix = tmpFileName.substring(0, pos);
+                		fileExt = tmpFileName.substring(pos + 1);
                 	}
-                	if (matchStr(ls_filePrefix, ls_mchPrefix) && matchStr(ls_fileExt, ls_mchExt)){
-                		if ((ls_fielNameList == null) || (ls_fielNameList.equals(""))){
-                    		ls_fielNameList = ls_tmpFileName;
+                	if (matchStr(filePrefix, mchPrefix) && matchStr(fileExt, mchExt)){
+                		if ((fielNameString == null) || ("".equals(fielNameString))){
+                    		fielNameString = tmpFileName;
                     	}else{
-                    		ls_fielNameList = ls_fielNameList + ls_split + ls_tmpFileName;
+                    		fielNameString = fielNameString + splitDelimiter + tmpFileName;
                     	}
                 	}
                 } else {
                 	//List appointed file
-                	if (ls_tmpFileName.equals(as_tag)){
-                		ls_fielNameList = ls_tmpFileName;
+                	if (tmpFileName.equals(tag)){
+                		fielNameString = tmpFileName;
                 	}
                 }
             
             }
 		}
 
-		if ((ls_fielNameList != null) && (!ls_fielNameList.equals(""))){
-			lsa_fileNameList = ls_fielNameList.split(ls_split);
+		if ((fielNameString != null) && (!"".equals(fielNameString))){
+			fileNameList = fielNameString.split(splitDelimiter);
 		}else{
-			lsa_fileNameList = new String[0];
+			fileNameList = new String[0];
 		}
 		try{
-			Arrays.sort(lsa_fileNameList);
-		}catch(Exception le_ex){
+			Arrays.sort(fileNameList);
+		}catch(Exception ex){
 			
 		}
-		return lsa_fileNameList;
+		return fileNameList;
 	} 
 	
-	private static boolean matchStr(String as_srcStr, String as_mchStr) throws Exception{
-		boolean lb_result = false;
-		String ls_tmpStr = "";
+	private static boolean matchStr(String srcStr, String mchStr) throws Exception{
+		boolean result = false;
+		String tmpStr = "";
 		
-		if (as_mchStr.indexOf("*") == -1) {
-			if (as_srcStr.equalsIgnoreCase(as_mchStr)){
-				lb_result = true;
+		if (mchStr.indexOf(DemoConstants.ASTERISK) == -1) {
+			if (srcStr.equalsIgnoreCase(mchStr)){
+				result = true;
 			}
-		} else if (as_mchStr.startsWith("*")){
-			ls_tmpStr = as_mchStr.substring(1); 
-			if (as_srcStr.endsWith(ls_tmpStr)){
-				lb_result = true;
+		} else if (mchStr.startsWith(DemoConstants.ASTERISK)){
+			tmpStr = mchStr.substring(1); 
+			if (srcStr.endsWith(tmpStr)){
+				result = true;
 			}
-		} else if (as_mchStr.endsWith("*")){
-			ls_tmpStr = as_mchStr.substring(0, as_mchStr.length() - 1);
-			if (as_srcStr.startsWith(ls_tmpStr)){
-				lb_result = true;
+		} else if (mchStr.endsWith(DemoConstants.ASTERISK)){
+			tmpStr = mchStr.substring(0, mchStr.length() - 1);
+			if (srcStr.startsWith(tmpStr)){
+				result = true;
 			}
 		} else {	
-			int li_count = as_mchStr.indexOf("*");
-			if ((as_srcStr.startsWith(as_mchStr.substring(0,li_count))) && (as_srcStr.endsWith(as_mchStr.substring(li_count + 1)))){
-				lb_result = true;
+			int count = mchStr.indexOf(DemoConstants.ASTERISK);
+			if ((srcStr.startsWith(mchStr.substring(0,count))) && (srcStr.endsWith(mchStr.substring(count + 1)))){
+				result = true;
 			}
 		}
 		
-		return lb_result;
+		return result;
 	}
 	
-	public void rename(String as_oldName, String as_newName) throws Exception{
-		v_sFTPClient.rename(as_oldName, as_newName);
+	public void rename(String oldName, String newName) throws Exception{
+		sftpClient.rename(oldName, newName);
 	}
 	
 	public String system() throws Exception{
-		String ls_result = execCommand("uname");
-		return ls_result; 
+		String result = execCommand("uname");
+		return result; 
 	}
 	
-	public String execCommand(String as_command) throws Exception{
-		if (v_sshSession == null){
+	public String execCommand(String command) throws Exception{
+		if (sshSession == null){
 			throw new Exception("No SFTP has been connected.");
 		}
 		
-		ChannelExec lce_channelExec = (ChannelExec)v_sshSession.openChannel("exec");
-		lce_channelExec.setCommand(as_command);
-		lce_channelExec.setInputStream(null);
-		lce_channelExec.connect();
+		ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
+		channelExec.setCommand(command);
+		channelExec.setInputStream(null);
+		channelExec.connect();
 				
-		final BufferedReader lbr_errReader = new BufferedReader(new InputStreamReader(((ChannelExec)lce_channelExec).getErrStream()));
-	    BufferedReader lbr_inReader = new BufferedReader(new InputStreamReader(lce_channelExec.getInputStream()));
+		final BufferedReader errReader = new BufferedReader(new InputStreamReader(((ChannelExec)channelExec).getErrStream()));
+	    BufferedReader inReader = new BufferedReader(new InputStreamReader(channelExec.getInputStream()));
 		
-	    final StringBuffer lsb_errorMessage = new StringBuffer();
-		ExecCommErrMsgThread lt_errorThread = new ExecCommErrMsgThread(lbr_errReader, lsb_errorMessage);
+	    final StringBuffer errorMessage = new StringBuffer();
+		ExecCommErrMsgThread errorThread = new ExecCommErrMsgThread(errReader, errorMessage);
 
 		try {
-		      lt_errorThread.start();
-		} catch (IllegalStateException le_ex) {		
-			le_ex.printStackTrace();
-			LOGGER.info("SFTPClientHandler.execCommand.errorThread:Error message : " + le_ex);
+		      errorThread.start();
+		} catch (IllegalStateException ex) {		
+			ex.printStackTrace();
+			LOGGER.info("SftpClientHandler.execCommand.errorThread:Error message : " + ex);
 		}
 		
-		String ls_outContents = "";
+		String outContents = "";
 		try {
-			ls_outContents = parseExecResult(lbr_inReader);			
+			outContents = parseExecResult(inReader);			
 
-		    if(lce_channelExec.isClosed()) {
-		    	int li_exitCode = lce_channelExec.getExitStatus();
-		    	LOGGER.info("SFTPClientHandler.execCommand.execChannel closed,exitCode = " + li_exitCode);
+		    if(channelExec.isClosed()) {
+		    	int exitCode = channelExec.getExitStatus();
+		    	LOGGER.info("SftpClientHandler.execCommand.execChannel closed,exitCode = " + exitCode);
 		    }
 
 		    try {
 		        // make sure that the error thread exits
-		    	lt_errorThread.join();
-		    } catch (InterruptedException le_ex) {		    	
-		    	LOGGER.info("SFTPClientHandler.execCommand.wait thread excetpion = " + le_ex);
+		    	errorThread.join();
+		    } catch (InterruptedException ex) {		    	
+		    	LOGGER.info("SftpClientHandler.execCommand.wait thread excetpion = " + ex);
 		    }
 		    
-		} catch (IOException le_ex) {
-			le_ex.printStackTrace();
-			throw new IOException(le_ex.toString());
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			throw new IOException(ex.toString());
 		}finally {
 			try {
-				lbr_inReader.close();
-			} catch (IOException le_ex) {
-				LOGGER.info("SFTPClientHandler.execCommand.close read string excetpion = " + le_ex);
+				inReader.close();
+			} catch (IOException ex) {
+				LOGGER.info("SftpClientHandler.execCommand.close read string excetpion = " + ex);
 			}
 
 		    try {
-		    	lbr_errReader.close();
-		    } catch (IOException le_ex) {
-		    	LOGGER.info("SFTPClientHandler.execCommand.close error string excetpion = " + le_ex);
+		    	errReader.close();
+		    } catch (IOException ex) {
+		    	LOGGER.info("SftpClientHandler.execCommand.close error string excetpion = " + ex);
 		    }
 		    
-		    if ((lsb_errorMessage.toString() != null) && (!lsb_errorMessage.toString().equals(""))){
-				throw new Exception(lsb_errorMessage.toString());
+		    if ((errorMessage.toString() != null) && (!"".equals(errorMessage.toString()))){
+				throw new Exception(errorMessage.toString());
 			}
 
-		    lce_channelExec.disconnect();
+		    channelExec.disconnect();
 		}    
-		return ls_outContents.trim();
+		return outContents.trim();
 	}
-		    
-	//Parse output string
-	protected String parseExecResult(BufferedReader abr_lines) throws IOException {
-		StringBuffer lsb_output = new StringBuffer();
-		char[] lca_buf = new char[512];
-		int li_readCount;
+
+	/**
+	 * Parse output string
+	 * @param lines
+	 * @return
+	 * @throws IOException
+	 */
+	protected String parseExecResult(BufferedReader lines) throws IOException {
+		StringBuffer output = new StringBuffer();
+		char[] buf = new char[512];
+		int readCount;
 		
-		while ( (li_readCount = abr_lines.read(lca_buf, 0, lca_buf.length)) > 0 ) {
-			lsb_output.append(lca_buf, 0, li_readCount);
+		while ( (readCount = lines.read(buf, 0, buf.length)) > 0 ) {
+			output.append(buf, 0, readCount);
 		}
 
-		return lsb_output.toString();
+		return output.toString();
 	}
 
 	
 	public void quit() throws Exception{
-		v_sFTPClient.quit();
-    	v_channel.disconnect();
-    	v_sshSession.disconnect();
+		sftpClient.quit();
+    	channel.disconnect();
+    	sshSession.disconnect();
 	}
 
 	
-	public void login(String as_userName, String as_password, int ai_port) throws Exception{
-   		v_sshSession = v_jsch.getSession(as_userName, vs_hostName, ai_port);
-   		v_sshSession.setPassword(as_password);
+	public void login(String userName, String password, int portParam) throws Exception{
+   		sshSession = jsch.getSession(userName, hostName, portParam);
+   		sshSession.setPassword(password);
     		
-   		Properties lp_sshConfig = new Properties();
-   		lp_sshConfig.setProperty("StrictHostKeyChecking", "no");
-   		lp_sshConfig.setProperty("PreferredAuthentications", "password");
-   		v_sshSession.setConfig(lp_sshConfig);
-   		v_sshSession.setTimeout(30000);
-   		v_sshSession.connect();
+   		Properties sshConfig = new Properties();
+   		sshConfig.setProperty("StrictHostKeyChecking", "no");
+   		sshConfig.setProperty("PreferredAuthentications", "password");
+   		sshSession.setConfig(sshConfig);
+   		sshSession.setTimeout(30000);
+   		sshSession.connect();
     		
-   		v_channel = v_sshSession.openChannel("sftp");
-   		v_channel.connect();
-   		v_sFTPClient = (ChannelSftp)v_channel;
-   		LOGGER.info("SFTPClientHandler login successfully, JSch version = " + v_sFTPClient.version());
+   		channel = sshSession.openChannel("sftp");
+   		channel.connect();
+   		sftpClient = (ChannelSftp)channel;
+   		LOGGER.info("SftpClientHandler login successfully, JSch version = " + sftpClient.version());
     }
 	
 	public static class ExecCommErrMsgThread extends Thread {
 		
-		BufferedReader vbr_errReader = null;
-		StringBuffer vsb_errorMessage = null;
-		
-		public ExecCommErrMsgThread(BufferedReader abr_errReader, StringBuffer asb_errorMessage){
-			vbr_errReader = abr_errReader;
-			vsb_errorMessage = asb_errorMessage;
+		BufferedReader errReader = null;
+		StringBuffer errorMessage = null;
+
+		public ExecCommErrMsgThread(BufferedReader errReader, StringBuffer errorMessage){
+			this.errReader = errReader;
+			this.errorMessage = errorMessage;
 		}
-		
+
 	    @Override
 	    public void run() {
 	        try {
-	        	String ls_line = vbr_errReader.readLine();
-	        	while((ls_line != null) && !isInterrupted()) {
-	        		vsb_errorMessage.append(ls_line);
-	        		ls_line = vbr_errReader.readLine();		        		
+	        	String line = errReader.readLine();
+	        	while((line != null) && !isInterrupted()) {
+	        		errorMessage.append(line);
+	        		line = errReader.readLine();
 	        	}
-	        } catch(IOException le_ex) {	
-	        	le_ex.printStackTrace();
-	        	LOGGER.info("SFTPClientHandler.execCommand.ExecCommErrMsgThread:Error reading the error stream : " + le_ex);
+	        } catch(IOException ex) {	
+	        	ex.printStackTrace();
+	        	LOGGER.info("SftpClientHandler.execCommand.ExecCommErrMsgThread:Error reading the error stream : " + ex);
 	        }
 	    }
 	};
@@ -362,13 +374,15 @@ public class SFTPClientHandler {
 	    	lh_para.put(new Integer(ERROR), "ERROR: ");
 	    	lh_para.put(new Integer(FATAL), "FATAL: ");
 	    }
-	    
-	    public boolean isEnabled(int ai_level){
+
+	    @Override
+	    public boolean isEnabled(int level){
 	      return true;
 	    }
-	    
-	    public void log(int ai_level, String as_message){
-	    	LOGGER.info("[SFTPClientHandler] " + (String)lh_para.get(new Integer(ai_level)) + as_message);
+
+	    @Override
+	    public void log(int level, String message){
+	    	LOGGER.info("[SftpClientHandler] " + (String)lh_para.get(new Integer(level)) + message);
 	    }
 	    
 	}

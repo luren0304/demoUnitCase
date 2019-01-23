@@ -1,52 +1,36 @@
 package com.excelhk.openapi.demoservice.bean;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.math.BigDecimal;
 
-@JsonInclude(Include.NON_NULL)
+/**
+ * @author anita
+ *
+ */
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RateInfo {
 	
-	private String ccy_Cde;
-	private String relvt_Ccy_Cde;
+	private String ccyCde;
+	private String relvtCcyCde;
 	private BigDecimal mid = null;
 	private BigDecimal bid = null;
 	private BigDecimal ask = null;
-	private String feed_Source;
+	private String feedSource;
 	private String lastDate;
-/*	
-	@Transient
-	private String errorcde;
-	@Transient
-	private String errormsg;
-	
-	
-	public String getErrorcde() {
-		return errorcde;
+
+	public String getCcyCde() {
+		return ccyCde;
 	}
-	public void setErrorcde(String errorcde) {
-		this.errorcde = errorcde;
+	public void setCcyCde(String ccyCde) {
+		this.ccyCde = ccyCde;
 	}
-	public String getErrormsg() {
-		return errormsg;
+	public String getRelvtCcyCde() {
+		return relvtCcyCde;
 	}
-	public void setErrormsg(String errormsg) {
-		this.errormsg = errormsg;
-	}
-	
-	*/
-	public String getCcy_Cde() {
-		return ccy_Cde;
-	}
-	public void setCcy_Cde(String ccy_Cde) {
-		this.ccy_Cde = ccy_Cde;
-	}
-	public String getRelvt_Ccy_Cde() {
-		return relvt_Ccy_Cde;
-	}
-	public void setRelvt_Ccy_Cde(String relvt_Ccy_Cde) {
-		this.relvt_Ccy_Cde = relvt_Ccy_Cde;
+	public void setRelvtCcyCde(String relvtCcyCde) {
+		this.relvtCcyCde = relvtCcyCde;
 	}
 	public BigDecimal getMid() {
 		return mid;
@@ -66,11 +50,11 @@ public class RateInfo {
 	public void setAsk(BigDecimal ask) {
 		this.ask = ask;
 	}
-	public String getFeed_Source() {
-		return feed_Source;
+	public String getFeedSource() {
+		return feedSource;
 	}
-	public void setFeed_Source(String feed_Source) {
-		this.feed_Source = feed_Source;
+	public void setFeedSource(String feedSource) {
+		this.feedSource = feedSource;
 	}
 	public String getLastDate() {
 		return lastDate;

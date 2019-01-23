@@ -5,7 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-
+/**
+ * @author anita
+ *
+ */
 @Component
 public class FtpFileLister {
 
@@ -13,7 +16,13 @@ public class FtpFileLister {
 	private InterfaceFileFtpProcess interfaceFileFtpProcess;
 	@Autowired
 	private CommonUtils commonUtils;
-	
+
+	/**
+	 *  Check if download file successfully
+	 *
+	 * @param ftpFileEvent
+	 * @throws Exception
+	 */
 	@EventListener
 	public void handleEvent(FtpFileEvent ftpFileEvent) throws Exception {
 		boolean fileExist = false;
@@ -22,7 +31,6 @@ public class FtpFileLister {
 			if(fileExist) {
 				System.out.println("file exists");
 				ftpFileEvent.setDownloadFlag(true);
-
 			}else {
 				System.out.println("file doesn't exist");
 				ftpFileEvent.setDownloadFlag(false);
@@ -33,9 +41,16 @@ public class FtpFileLister {
 			ftpFileEvent.setSftpException(commonUtils.handleErr(e));
 		}
 	}
-	
-	public boolean ftpFileHandle(String as_FileName) throws Exception {
-		return interfaceFileFtpProcess.download(as_FileName);
+
+	/**
+	 *
+	 *  Download ftp file
+	 * @param fileName
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean ftpFileHandle(String fileName) throws Exception {
+		return interfaceFileFtpProcess.download(fileName);
 	}
 	
 }
