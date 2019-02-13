@@ -6,7 +6,7 @@ package com.excelhk.openapi.demoservice.utils.constants;
  *
  */
 public class DemoConstants {
-    public static final String REQUEST_TOKEN_HEADER = "connection-type";
+    /** public static final String REQUEST_TOKEN_HEADER = "connection-type";*/
     public static final String CONNECT_TYPE_FTP = "ftp";
     public static final String PROD_TYPE_DEPOSIT = "Deposits";
     public static final String PROD_TYPE_LOANS = "Loans";
@@ -29,5 +29,13 @@ public class DemoConstants {
     public static final String CONN_TIMED_OUT = "Connection timed out";
     public static final String TIME_OUT = "timeout:";
     public static final String CONN_REFUSED = "Connection refused";
+
+    // Event Handle type
+    public static final String EVENT_TYPE_DOWNLOAD="DOWNLOAD";
+    public static final String EVENT_TYPE_PROD="PROD";
+    public static final String EVENT_TYPE_DETAILS="DETAILS";
+    // type
+    public static final String FTP_IN = "IN";
+    public static final String FTP_OUT="OUT";
 
 }

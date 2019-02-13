@@ -41,7 +41,7 @@ public class LoanController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/findone/prodid/{prodid}")
-	public Object findByProdId(@PathVariable("prodid") String prodId, @RequestHeader(value = DemoConstants.REQUEST_TOKEN_HEADER, required = false) String connType) {
+	public Object findByProdId(@PathVariable("prodid") String prodId, @RequestHeader(value = "${sftp.conn.type}", required = false) String connType) {
         logger.info("findByProdId" + prodId);
 		logger.info("connType " + connType);
         if(StringUtils.isNotEmpty(connType) && DemoConstants.CONNECT_TYPE_FTP.equalsIgnoreCase(connType)) {
@@ -61,7 +61,7 @@ public class LoanController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/findProd")
-	public Object findAllProd(@RequestHeader(value = DemoConstants.REQUEST_TOKEN_HEADER, required = false) String connType) {
+	public Object findAllProd(@RequestHeader(value = "${sftp.conn.type}", required = false) String connType) {
         logger.info("findAllProd");
 		logger.info("connType " + connType);
         if(StringUtils.isNotEmpty(connType) && DemoConstants.CONNECT_TYPE_FTP.equalsIgnoreCase(connType)) {

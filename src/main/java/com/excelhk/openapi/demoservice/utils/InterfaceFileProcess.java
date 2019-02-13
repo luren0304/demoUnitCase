@@ -72,6 +72,7 @@ public class InterfaceFileProcess {
 			 * Get remote in file
 			 */
 			logger.info("download file start");
+
 			success = downloadLoop(fileName);
 			if(success) {
 				logger.info("download file successfully");
@@ -79,6 +80,7 @@ public class InterfaceFileProcess {
 				commonUtils.getDetailByFile(obj, fileName, details);
 			}
 			logger.info("download file end");
+
 		}else {
 			details.add(obj);
 		}
@@ -152,4 +154,6 @@ public class InterfaceFileProcess {
 		}
 		return success;
 	}
+
+
 }

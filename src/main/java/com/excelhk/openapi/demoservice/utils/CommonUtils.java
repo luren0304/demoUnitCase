@@ -24,6 +24,8 @@ import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +40,9 @@ public class CommonUtils {
 	
 	@Value("${sftp.localInpath}")
 	private String localInpath;
+
+	@Value("${sftp.localInpathBak}")
+	private String localInpathBak;
 	
 	@Value("${sftp.localOutpath}")
 	private String localOutpath;
@@ -51,13 +56,14 @@ public class CommonUtils {
 	@Value("${sftp.remoteIn.file.conv:txt}")
 	private String remoteInFileConv;
 	
-	private static Logger LOGGER = LoggerFactory.getLogger(CommonUtils.class);
+	private static Logger logger = LoggerFactory.getLogger(CommonUtils.class);
 
 	@Autowired
 	private FieldMappingService fieldMappingService;
 
 	@Autowired
-	private InterfaceFileProcess interfaceFileProcess;
+	private InterfaceFileUtils interfaceFileUtils;
+	//private InterfaceFileProcess interfaceFileProcess;
 
 	public String getFileName(String fileName) {
 		IdWorker id = new IdWorker(1);
@@ -68,8 +74,8 @@ public class CommonUtils {
 	 * check if directory exists, if not, create it.
 	 * @param dir
 	 */
-	public void checkDirExist(String dir) {
-		LOGGER.info("dir " + dir);
+	public static void checkDirExist(String dir) {
+		logger.info("dir " + dir);
 		File fileDir = new File(dir);
 		if(!fileDir.exists()) {
 			fileDir.mkdirs();
@@ -77,13 +83,32 @@ public class CommonUtils {
 	}
 
 	public static String getFullPath(String path){
-		if(!path.endsWith(File.separator)) {
+		/*if(!path.endsWith(File.separator)) {
 			return path + File.separator ;
 		}else {
 			return path;
+		}*/
+		logger.info("path " + path);
+		String pathTmp = path;
+		if(path.indexOf("/") >= 0 && !path.endsWith("/")  ) {
+			logger.info("// " );
+			pathTmp = path + "/";
+		}else if(path.indexOf("\\") >= 0 && !path.endsWith("\\")  ) {
+			logger.info("\\" );
+			pathTmp = path + "\\";
+		}else{
+			//pathTmp = path + File.separator;
+			pathTmp = path + "/";
 		}
+		logger.info("pathTmp " + pathTmp);
+		return pathTmp;
+
 	}
 
+	public boolean checkFileExist(String fileName){
+
+		return Files.exists(Paths.get(getFullPath(localInpath) + fileName + "." + remoteInFileConv));
+	}
 	/**
 	 * Generate request file with content
 	 * 
@@ -92,24 +117,20 @@ public class CommonUtils {
 	 * @return
 	 */
 	public boolean generateFile(String fileName, String contentParam) {
-		LOGGER.info("fileName " + fileName);
-		LOGGER.info("contentParam " + contentParam);
+		logger.info("fileName " + fileName);
+		logger.info("contentParam " + contentParam);
 		if(fileName == null || contentParam == null) {
-			LOGGER.info("one of fileName and content is null" );
+			logger.info("one of fileName and content is null" );
 			return false;
 		}
 		String content="ReplyFileName=" + fileName;
 		
 		PrintWriter outContent = null;
 		try{
-			String localOutpathString = null;
 			checkDirExist(localOutpath);
-			if(!localOutpath.endsWith(File.separator)) {
-				localOutpathString = localOutpath + File.separator + fileName + "." + remoteOutFileConv;
-			}else {
-				localOutpathString = localOutpath + fileName + "." + remoteOutFileConv;;
-			}
-			LOGGER.info("localOutpathString " + localOutpathString);
+			fileName = fileName + "." + remoteOutFileConv;
+			String localOutpathString = CommonUtils.getFullPath(localOutpath) + fileName;
+			logger.info("localOutpathString " + localOutpathString);
 			outContent = new PrintWriter(new BufferedWriter(new FileWriter(localOutpathString, false)), true);
 			outContent.println(content + "." + remoteInFileConv);
 			content = "Delimiter=" + fileDelimiter;
@@ -139,23 +160,19 @@ public class CommonUtils {
 	 */
 	public boolean generateFile(String fileName, Object obj) {
 		
-		LOGGER.info("fileName " + fileName);
-		LOGGER.info("obj " + obj);
+		logger.info("fileName " + fileName);
+		logger.info("obj " + obj);
 		if(fileName == null || obj == null) {
-			LOGGER.info("one of fileName and obj is null" );
+			logger.info("one of fileName and obj is null" );
 			return false;
 		}
 		String content="ReplyFileName=" + fileName;
 		PrintWriter outContent = null;
 		try{
-			String localOutpathString = null;
 			checkDirExist(localOutpath);
-			if(!localOutpath.endsWith(File.separator)) {
-				localOutpathString = localOutpath + File.separator + fileName + "." + remoteOutFileConv;
-			}else {
-				localOutpathString = localOutpath + fileName + "." + remoteOutFileConv;
-			}
-			LOGGER.info("localOutpathString " + localOutpathString);
+			fileName = fileName + "." + remoteOutFileConv;
+			String localOutpathString = CommonUtils.getFullPath(localOutpath) + fileName;
+			logger.info("localOutpathString " + localOutpathString);
 			outContent = new PrintWriter(new BufferedWriter(new FileWriter(localOutpathString, false)), true);
 			outContent.println(content + "." + remoteInFileConv);
 			content = "Delimiter=" + fileDelimiter;
@@ -221,22 +238,22 @@ public class CommonUtils {
 	 */
 	public void getProdsByFile(List prodLst, String fileName, Object obj) {
 		CSVReader reader = null;
+		String localInpathString = null;
+		String localInpathBakFile = null;
 		String[] nextLine;
 		try{
-			String localInpathString = null;
 			checkDirExist(localInpath);
-			if(!localInpath.endsWith(File.separator)) {
-				localInpathString = localInpath + File.separator + fileName + "." + remoteInFileConv;
-			}else {
-				localInpathString = localInpath + fileName + "." + remoteInFileConv;;
-			}
-			LOGGER.info("localInpathString " + localInpathString);
+			checkDirExist(localInpathBak);
+			fileName = fileName + "." + remoteInFileConv;
+			localInpathString = CommonUtils.getFullPath(localInpath) + fileName;
+			localInpathBakFile = CommonUtils.getFullPath(localInpathBak) + fileName;
+			logger.info("localInpathString " + localInpathString);
 			
 			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
 			reader = new CSVReaderBuilder(new FileReader(localInpathString)).withCSVParser(rfc4180Parser).build();
 			while((nextLine=reader.readNext()) != null) {
-				LOGGER.info("nextLine.length : " +nextLine.length);
+				logger.info("nextLine.length : " +nextLine.length);
 				if(obj instanceof Loan) {
 					((Loan) obj).setProdId(nextLine[0]);
 					prodLst.add(obj);
@@ -247,8 +264,9 @@ public class CommonUtils {
 					obj = new Deposit();
 				}
 			}
+
 		}catch(FileNotFoundException ex) {
-			LOGGER.error("File " + fileName +" not found!" );
+			logger.error("File " + fileName +" not found!" );
 			return;
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -260,6 +278,8 @@ public class CommonUtils {
 					e.printStackTrace();
 				}
 			}
+			//back up file
+			backup(localInpathString, localInpathBakFile);
 		}
 	
 	}
@@ -272,22 +292,22 @@ public class CommonUtils {
 	 * @param detailsLst
 	 */
 	public void getDepositDetailByFile(Deposit info, String fileName, List detailsLst) {
-		
+		String localInpathString = null;
+		String localInpathBakFile = null;
 		CSVReader reader = null;
 		String[] nextLine;
 		try{
-			String localInpathString = null;
-			if(!localInpath.endsWith(File.separator)) {
-				localInpathString = localInpath + File.separator + fileName + "." + remoteInFileConv;;
-			}else {
-				localInpathString = localInpath + fileName + "." + remoteInFileConv;;
-			}
-			LOGGER.info("localInpathString " + localInpathString);
+			checkDirExist(localInpath);
+			checkDirExist(localInpathBak);
+			fileName = fileName + "." + remoteInFileConv;
+			localInpathString = CommonUtils.getFullPath(localInpath) + fileName;
+			localInpathBakFile = CommonUtils.getFullPath(localInpathBak) + fileName;
+			logger.info("localInpathString " + localInpathString);
 			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
 			reader = new CSVReaderBuilder(new FileReader(localInpathString)).withCSVParser(rfc4180Parser).build();
 			while((nextLine=reader.readNext()) != null) {
-				LOGGER.info("nextLine.length : " +nextLine.length);
+				logger.info("nextLine.length : " +nextLine.length);
 				//info
 				if(info.getProdId() == null) {
 					info.setProdId(nextLine[0]);
@@ -319,8 +339,9 @@ public class CommonUtils {
 				detailsLst.add(info);
 				info = new Deposit();
 			}
+
 		}catch(FileNotFoundException ex) {
-			LOGGER.error("File " + fileName +" not found!" );
+			logger.error("File " + fileName +" not found!" );
 			return;
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -332,6 +353,8 @@ public class CommonUtils {
 					e.printStackTrace();
 				}
 			}
+			//back up file
+			backup(localInpathString, localInpathBakFile);
 		}
 	}
 	
@@ -343,22 +366,22 @@ public class CommonUtils {
 	 * @param detailsLst
 	 */
 	public void getLoanDetailByFile(Loan info, String fileName, List detailsLst) {
-		
+		String localInpathString = null;
+		String localInpathBakFile = null;
 		CSVReader reader = null;
 		String[] nextLine;
 		try{
-			String localInpathString = null;
-			if(!localInpath.endsWith(File.separator)) {
-				localInpathString = localInpath + File.separator + fileName + "." + remoteInFileConv;;
-			}else {
-				localInpathString = localInpath + fileName + "." + remoteInFileConv;;
-			}
-			LOGGER.info("localInpathString " + localInpathString);
+			checkDirExist(localInpath);
+			checkDirExist(localInpathBak);
+			fileName = fileName + "." + remoteInFileConv;
+			localInpathString = CommonUtils.getFullPath(localInpath) + fileName;
+			localInpathBakFile = CommonUtils.getFullPath(localInpathBak) + fileName;
+			logger.info("localInpathString " + localInpathString);
 			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
 			reader = new CSVReaderBuilder(new FileReader(localInpathString)).withCSVParser(rfc4180Parser).build();
 			while((nextLine=reader.readNext()) != null) {
-				LOGGER.info("nextLine.length : " +nextLine.length);
+				logger.info("nextLine.length : " +nextLine.length);
 				if(info.getProdId() == null) {
 					info.setProdId(nextLine[0]);
 				}
@@ -392,8 +415,9 @@ public class CommonUtils {
 				detailsLst.add(info);
 				info = new Loan();
 			}
+
 		}catch(FileNotFoundException ex) {
-			LOGGER.error("File " + fileName +" not found!" );
+			logger.error("File " + fileName +" not found!" );
 			return;
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -405,6 +429,8 @@ public class CommonUtils {
 					e.printStackTrace();
 				}
 			}
+			//back up file
+			backup(localInpathString, localInpathBakFile);
 		}
 	}
 	
@@ -416,24 +442,24 @@ public class CommonUtils {
 	 * @param detailsLst
 	 */
 	public void getRateDetailByFile(RateInfo info, String fileName, List detailsLst) {
-		
+		String localInpathString = null;
+		String localInpathBakFile = null;
 		CSVReader reader = null;
 		String[] nextLine;
 		try{
-			String localInpathString = null;
-			if(!localInpath.endsWith(File.separator)) {
-				localInpathString = localInpath + File.separator + fileName + "." + remoteInFileConv;;
-			}else {
-				localInpathString = localInpath + fileName + "." + remoteInFileConv;;
-			}
-			LOGGER.info("localInpathString " + localInpathString);
+			checkDirExist(localInpath);
+			checkDirExist(localInpathBak);
+			fileName = fileName + "." + remoteInFileConv;
+			localInpathString = CommonUtils.getFullPath(localInpath) + fileName;
+			localInpathBakFile = CommonUtils.getFullPath(localInpathBak) + fileName;
+			logger.info("localInpathString " + localInpathString);
 			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
 			reader = new CSVReaderBuilder(new FileReader(localInpathString)).withCSVParser(rfc4180Parser).build();
 			String ccy = info.getCcyCde();
 			String relvtCcy = info.getRelvtCcyCde();
 			while((nextLine=reader.readNext()) != null) {
-				LOGGER.info("nextLine.length : " +nextLine.length);
+				logger.info("nextLine.length : " +nextLine.length);
 				//info
 				if(info.getCcyCde() == null) {
 					info.setCcyCde(ccy);
@@ -457,8 +483,9 @@ public class CommonUtils {
 				detailsLst.add(info);
 				info = new RateInfo();
 			}
+
 		}catch(FileNotFoundException ex) {
-			LOGGER.error("File " + fileName +" not found!" );
+			logger.error("File " + fileName +" not found!" );
 			return;
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -470,6 +497,8 @@ public class CommonUtils {
 					e.printStackTrace();
 				}
 			}
+			//back up file
+			backup(localInpathString, localInpathBakFile);
 		}
 	}
 	
@@ -478,7 +507,7 @@ public class CommonUtils {
 		String errMsg;
 		String msg = e.getMessage();
 		if (e instanceof JSchException) {
-			LOGGER.error("login or connect error. error message: " + msg);
+			logger.error("login or connect error. error message: " + msg);
 			if(msg != null) {
 				if (msg.contains(DemoConstants.AUTH_FAIL)) {
 					errMsg = "ftp login failed";
@@ -493,7 +522,7 @@ public class CommonUtils {
 				errMsg = "ftp Connection Exception";
 			}
 		}else if (e instanceof SftpException) {
-			LOGGER.error("ChannelSftp " + msg);
+			logger.error("ChannelSftp " + msg);
 			if(((SftpException) e).id == ChannelSftp.SSH_FX_NO_CONNECTION || ((SftpException) e).id == ChannelSftp.SSH_FX_CONNECTION_LOST ){
 				msg = "Connection error";
 			}else {
@@ -501,7 +530,7 @@ public class CommonUtils {
 			}
 			errMsg = "ftp error: " + msg;
 		}else {
-			LOGGER.error("other error message: " + msg);
+			logger.error("other error message: " + msg);
 			msg = "Internal Server error";
 			errMsg = msg;
 		}
@@ -514,14 +543,16 @@ public class CommonUtils {
 	public Object responseFtpError(String prod , Object obj){
 		try {
 			if(StringUtils.isEmpty(prod)) {
-				return interfaceFileProcess.getDetails(obj);
+				//return interfaceFileProcess.getDetails(obj);
+				return interfaceFileUtils.getDetails(obj);
 			} else {
-				return interfaceFileProcess.getProds(prod,obj);
+				//return interfaceFileProcess.getProds(prod,obj);
+				return interfaceFileUtils.getProds(prod,obj);
 			}
 		} catch (SftpException e) {
 			Map<String, String> map = new HashMap<String, String>(1);
 			map.put("error", e.getMessage());
-			LOGGER.error("responseFtpError " +  e.getMessage());
+			logger.error("responseFtpError " +  e.getMessage());
 			return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -563,5 +594,17 @@ public class CommonUtils {
 			}
 		}
 		return content;
+	}
+
+	public void backup(String path, String bakPath){
+		logger.info("backup path: " + path );
+		logger.info("backup bakPath: " + bakPath );
+		File fileIn = new File(path);
+		File fileInBak = new File(bakPath);
+		if(fileIn.renameTo(fileInBak)){
+			logger.info("backup file successfully" );
+		}else{
+			logger.info("backup file failed" );
+		}
 	}
 }
