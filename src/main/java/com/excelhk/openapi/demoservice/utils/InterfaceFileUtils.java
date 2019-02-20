@@ -10,9 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -28,9 +32,11 @@ public class InterfaceFileUtils {
     @Value("${sftp.retry}")
     private int loopCnt;
 
+    private Hashtable exceptionMessage;
+
     @Autowired
     private InterfaceFileFtpUtils interfaceFileFtpUtils;
-    //private InterfaceFileFtpProcess interfaceFileFtpProcess;
+
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -61,6 +67,7 @@ public class InterfaceFileUtils {
             //upload file
             try {
                 interfaceFileFtpUtils.upload(fileName);
+
             } catch (Exception e) {
                 throw commonUtils.handleErr(e);
             }
@@ -70,7 +77,23 @@ public class InterfaceFileUtils {
             ftpFileEvent.setEventType(DemoConstants.EVENT_TYPE_DETAILS);
             ftpFileEvent.setObject(obj);
             ftpFileEvent.setProdLst(details);
-            getFileLoop(ftpFileEvent);
+            //getFileLoop(ftpFileEvent);
+            if(!getFileLoop(ftpFileEvent)){
+                if(exceptionMessage != null){
+                    logger.error("{} key failed {}",exceptionMessage);
+                    Exception exception = (Exception)exceptionMessage.get(fileName);
+                    if(exception != null){
+                        logger.error("fileName: " + fileName + " exception:" + exception);
+                        throw commonUtils.handleErr(exception);
+                    }else {
+                        exception = (Exception)exceptionMessage.get("Other");
+                        logger.error("Other exception:" + exception);
+                        if(exception != null){
+                            throw commonUtils.handleErr(exception);
+                        }
+                    }
+                }
+            }
         }else {
             details.add(obj);
         }
@@ -102,7 +125,23 @@ public class InterfaceFileUtils {
             ftpFileEvent.setEventType(DemoConstants.EVENT_TYPE_PROD);
             ftpFileEvent.setObject(obj);
             ftpFileEvent.setProdLst(pordLst);
-            getFileLoop(ftpFileEvent);
+            if(!getFileLoop(ftpFileEvent)){
+                if(exceptionMessage != null){
+                    logger.error("{} key failed {}",exceptionMessage);
+                    Exception exception = (Exception)exceptionMessage.get(fileName);
+                    if(exception != null){
+                        logger.error("exception:" + exception);
+                        throw commonUtils.handleErr(exception);
+                    }else {
+                        exception = (Exception)exceptionMessage.get("Other");
+                        logger.error("exception:" + exception);
+                        if(exception != null){
+                            throw commonUtils.handleErr(exception);
+                        }
+                    }
+                }
+            }
+
         }
         return pordLst;
     }
@@ -135,4 +174,34 @@ public class InterfaceFileUtils {
         return success;
     }
 
+    @ServiceActivator(inputChannel="errorChannel")
+    public void errorHandler(ErrorMessage errorMessage) {
+        Exception exceptionMsg = (Exception)errorMessage.getPayload();
+        Message<?> message = errorMessage.getOriginalMessage();
+        if(null != exceptionMsg) {
+            exceptionMsg = (Exception) exceptionMsg.getCause();
+            Exception exceptionTmp = exceptionMsg;
+            while (null != exceptionMsg) {
+                logger.error("errorHandler exception: " + exceptionMsg.getMessage());
+                if (null != exceptionMsg) {
+                    exceptionTmp = exceptionMsg;
+                }
+                exceptionMsg = (Exception) exceptionMsg.getCause();
+            }
+            Hashtable exceptionTable = new Hashtable();
+            String fileName = null;
+            if(message == null){
+                fileName = "Other";
+            }else{
+                fileName = (String)message.getHeaders().get("file_name");
+            }
+
+            exceptionTable.put(fileName.substring(0, fileName.lastIndexOf(".")), exceptionTmp);
+            setExceptionMessage(exceptionTable);
+        }
+    }
+
+    public void setExceptionMessage(Hashtable exceptionMessage) {
+        this.exceptionMessage = exceptionMessage;
+    }
 }

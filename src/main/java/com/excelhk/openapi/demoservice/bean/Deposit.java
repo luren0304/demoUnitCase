@@ -77,4 +77,19 @@ public class Deposit {
     public void setRemark(String remark) {
         this.remark = remark;
     }
+
+    @Override
+    public String toString() {
+        return "Deposit{" +
+                "prodId='" + prodId + '\'' +
+                ", product='" + product + '\'' +
+                ", type='" + type + '\'' +
+                ", subtype='" + subtype + '\'' +
+                ", currency='" + currency + '\'' +
+                ", interestRate='" + interestRate + '\'' +
+                ", minamount='" + minamount + '\'' +
+                ", fee='" + fee + '\'' +
+                ", remark='" + remark + '\'' +
+                '}';
+    }
 }

@@ -84,4 +84,19 @@ public class Loan {
         this.remark = remark;
     }
 
+    @Override
+    public String toString() {
+        return "Loan{" +
+                "prodId='" + prodId + '\'' +
+                ", product='" + product + '\'' +
+                ", type='" + type + '\'' +
+                ", subtype='" + subtype + '\'' +
+                ", interestRate='" + interestRate + '\'' +
+                ", prdinfo1='" + prdinfo1 + '\'' +
+                ", prdinfo2='" + prdinfo2 + '\'' +
+                ", prdinfo3='" + prdinfo3 + '\'' +
+                ", fee='" + fee + '\'' +
+                ", remark='" + remark + '\'' +
+                '}';
+    }
 }

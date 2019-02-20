@@ -40,6 +40,8 @@ dependencies {
     implementation('org.springframework.integration:spring-integration-sftp')
     implementation('com.jcraft:jsch:0.1.55')
     implementation('com.opencsv:opencsv:4.4')
+    //implementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
     providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testCompile('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
 }

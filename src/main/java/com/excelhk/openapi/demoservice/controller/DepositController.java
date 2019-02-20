@@ -46,6 +46,7 @@ public class DepositController {
 
     @RequestMapping(method = RequestMethod.GET, value="/findone/prodid/{prodid}")
 	public Object findByProdId(@PathVariable("prodid") String prodId, @RequestHeader(value = "${sftp.conn.type}", required = false) String connType) {
+
         logger.info("findByProdId" + prodId);
 		logger.info("connType " + connType);
 		if(StringUtils.isNotEmpty(connType) && DemoConstants.CONNECT_TYPE_FTP.equalsIgnoreCase(connType)) {
@@ -57,6 +58,7 @@ public class DepositController {
 			return depositService.findByProdId(prodId);
 
 		}
+
     }
 
     @RequestMapping(method = RequestMethod.GET, value="/findall")

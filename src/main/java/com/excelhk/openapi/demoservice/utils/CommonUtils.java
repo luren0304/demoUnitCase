@@ -26,10 +26,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author anita
@@ -41,20 +38,20 @@ public class CommonUtils {
 	@Value("${sftp.localInpath}")
 	private String localInpath;
 
-	@Value("${sftp.localInpathBak}")
-	private String localInpathBak;
-	
 	@Value("${sftp.localOutpath}")
 	private String localOutpath;
 	
 	@Value("${sftp.file.delimiter:,}")
 	private char fileDelimiter;
 	
-	@Value("${sftp.romteOut.file.conv:txt}")
-	private String remoteOutFileConv;
+	@Value("${sftp.romteOut.file.extension:txt}")
+	private String remoteOutFileExtension;
 	
-	@Value("${sftp.remoteIn.file.conv:txt}")
-	private String remoteInFileConv;
+	@Value("${sftp.remoteIn.file.extension:csv}")
+	private String remoteInFileExtension;
+
+	@Value("${sftp.back.file.extension:tmp}")
+	private String bakInFileExtension;
 	
 	private static Logger logger = LoggerFactory.getLogger(CommonUtils.class);
 
@@ -63,7 +60,8 @@ public class CommonUtils {
 
 	@Autowired
 	private InterfaceFileUtils interfaceFileUtils;
-	//private InterfaceFileProcess interfaceFileProcess;
+
+	private Hashtable exceptionMessage;
 
 	public String getFileName(String fileName) {
 		IdWorker id = new IdWorker(1);
@@ -107,7 +105,7 @@ public class CommonUtils {
 
 	public boolean checkFileExist(String fileName){
 
-		return Files.exists(Paths.get(getFullPath(localInpath) + fileName + "." + remoteInFileConv));
+		return Files.exists(Paths.get(getFullPath(localInpath) + fileName + "." + bakInFileExtension));
 	}
 	/**
 	 * Generate request file with content
@@ -128,11 +126,11 @@ public class CommonUtils {
 		PrintWriter outContent = null;
 		try{
 			checkDirExist(localOutpath);
-			fileName = fileName + "." + remoteOutFileConv;
+			fileName = fileName + "." + remoteOutFileExtension;
 			String localOutpathString = CommonUtils.getFullPath(localOutpath) + fileName;
 			logger.info("localOutpathString " + localOutpathString);
 			outContent = new PrintWriter(new BufferedWriter(new FileWriter(localOutpathString, false)), true);
-			outContent.println(content + "." + remoteInFileConv);
+			outContent.println(content + "." + remoteInFileExtension);
 			content = "Delimiter=" + fileDelimiter;
 			outContent.println(content);
 			content = contentParam;
@@ -170,11 +168,11 @@ public class CommonUtils {
 		PrintWriter outContent = null;
 		try{
 			checkDirExist(localOutpath);
-			fileName = fileName + "." + remoteOutFileConv;
+			fileName = fileName + "." + remoteOutFileExtension;
 			String localOutpathString = CommonUtils.getFullPath(localOutpath) + fileName;
 			logger.info("localOutpathString " + localOutpathString);
 			outContent = new PrintWriter(new BufferedWriter(new FileWriter(localOutpathString, false)), true);
-			outContent.println(content + "." + remoteInFileConv);
+			outContent.println(content + "." + remoteInFileExtension);
 			content = "Delimiter=" + fileDelimiter;
 			outContent.println(content);
 			content ="Request data: ";
@@ -239,14 +237,12 @@ public class CommonUtils {
 	public void getProdsByFile(List prodLst, String fileName, Object obj) {
 		CSVReader reader = null;
 		String localInpathString = null;
-		String localInpathBakFile = null;
 		String[] nextLine;
 		try{
 			checkDirExist(localInpath);
-			checkDirExist(localInpathBak);
-			fileName = fileName + "." + remoteInFileConv;
+			//fileName = fileName + "." + remoteInFileExtension;
+			fileName = fileName + "." + bakInFileExtension;
 			localInpathString = CommonUtils.getFullPath(localInpath) + fileName;
-			localInpathBakFile = CommonUtils.getFullPath(localInpathBak) + fileName;
 			logger.info("localInpathString " + localInpathString);
 			
 			//reader = new CSVReader(new FileReader(localInpathString));
@@ -278,8 +274,6 @@ public class CommonUtils {
 					e.printStackTrace();
 				}
 			}
-			//back up file
-			backup(localInpathString, localInpathBakFile);
 		}
 	
 	}
@@ -293,15 +287,13 @@ public class CommonUtils {
 	 */
 	public void getDepositDetailByFile(Deposit info, String fileName, List detailsLst) {
 		String localInpathString = null;
-		String localInpathBakFile = null;
 		CSVReader reader = null;
 		String[] nextLine;
 		try{
 			checkDirExist(localInpath);
-			checkDirExist(localInpathBak);
-			fileName = fileName + "." + remoteInFileConv;
+			//fileName = fileName + "." + remoteInFileExtension;
+			fileName = fileName + "." + bakInFileExtension;
 			localInpathString = CommonUtils.getFullPath(localInpath) + fileName;
-			localInpathBakFile = CommonUtils.getFullPath(localInpathBak) + fileName;
 			logger.info("localInpathString " + localInpathString);
 			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
@@ -353,8 +345,8 @@ public class CommonUtils {
 					e.printStackTrace();
 				}
 			}
-			//back up file
-			backup(localInpathString, localInpathBakFile);
+//			//back up file
+//			backup(fileName);
 		}
 	}
 	
@@ -367,15 +359,13 @@ public class CommonUtils {
 	 */
 	public void getLoanDetailByFile(Loan info, String fileName, List detailsLst) {
 		String localInpathString = null;
-		String localInpathBakFile = null;
 		CSVReader reader = null;
 		String[] nextLine;
 		try{
 			checkDirExist(localInpath);
-			checkDirExist(localInpathBak);
-			fileName = fileName + "." + remoteInFileConv;
+			//fileName = fileName + "." + remoteInFileExtension;
+			fileName = fileName + "." + bakInFileExtension;
 			localInpathString = CommonUtils.getFullPath(localInpath) + fileName;
-			localInpathBakFile = CommonUtils.getFullPath(localInpathBak) + fileName;
 			logger.info("localInpathString " + localInpathString);
 			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
@@ -429,8 +419,8 @@ public class CommonUtils {
 					e.printStackTrace();
 				}
 			}
-			//back up file
-			backup(localInpathString, localInpathBakFile);
+//			//back up file
+//			backup(fileName);
 		}
 	}
 	
@@ -443,15 +433,13 @@ public class CommonUtils {
 	 */
 	public void getRateDetailByFile(RateInfo info, String fileName, List detailsLst) {
 		String localInpathString = null;
-		String localInpathBakFile = null;
 		CSVReader reader = null;
 		String[] nextLine;
 		try{
 			checkDirExist(localInpath);
-			checkDirExist(localInpathBak);
-			fileName = fileName + "." + remoteInFileConv;
+			//fileName = fileName + "." + remoteInFileExtension;
+			fileName = fileName + "." + bakInFileExtension;
 			localInpathString = CommonUtils.getFullPath(localInpath) + fileName;
-			localInpathBakFile = CommonUtils.getFullPath(localInpathBak) + fileName;
 			logger.info("localInpathString " + localInpathString);
 			//reader = new CSVReader(new FileReader(localInpathString));
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
@@ -497,8 +485,8 @@ public class CommonUtils {
 					e.printStackTrace();
 				}
 			}
-			//back up file
-			backup(localInpathString, localInpathBakFile);
+//			//back up file
+//			backup(fileName);
 		}
 	}
 	
@@ -543,12 +531,11 @@ public class CommonUtils {
 	public Object responseFtpError(String prod , Object obj){
 		try {
 			if(StringUtils.isEmpty(prod)) {
-				//return interfaceFileProcess.getDetails(obj);
 				return interfaceFileUtils.getDetails(obj);
 			} else {
-				//return interfaceFileProcess.getProds(prod,obj);
 				return interfaceFileUtils.getProds(prod,obj);
 			}
+
 		} catch (SftpException e) {
 			Map<String, String> map = new HashMap<String, String>(1);
 			map.put("error", e.getMessage());
@@ -596,15 +583,5 @@ public class CommonUtils {
 		return content;
 	}
 
-	public void backup(String path, String bakPath){
-		logger.info("backup path: " + path );
-		logger.info("backup bakPath: " + bakPath );
-		File fileIn = new File(path);
-		File fileInBak = new File(bakPath);
-		if(fileIn.renameTo(fileInBak)){
-			logger.info("backup file successfully" );
-		}else{
-			logger.info("backup file failed" );
-		}
-	}
+
 }

@@ -31,7 +31,7 @@ public class DemoConstants {
     public static final String CONN_REFUSED = "Connection refused";
 
     // Event Handle type
-    public static final String EVENT_TYPE_DOWNLOAD="DOWNLOAD";
+    //public static final String EVENT_TYPE_DOWNLOAD="DOWNLOAD";
     public static final String EVENT_TYPE_PROD="PROD";
     public static final String EVENT_TYPE_DETAILS="DETAILS";
     // type

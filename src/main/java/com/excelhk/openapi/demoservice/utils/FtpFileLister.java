@@ -16,8 +16,12 @@ public class FtpFileLister {
 	@Autowired
 	private CommonUtils commonUtils;
 
+	/**
+	 *
+	 * @param ftpFileEvent
+	 */
 	@EventListener
-	public void handleEvent(FtpFileEvent ftpFileEvent) throws Exception {
+	public void handleEvent(FtpFileEvent ftpFileEvent) {
 		boolean fileExist = false;
 		try{
 			fileExist = commonUtils.checkFileExist(ftpFileEvent.getFileName());
@@ -42,26 +46,6 @@ public class FtpFileLister {
 		}
 
 	}
-/*
-
-	public void ftpFileHandle(FtpFileEvent ftpFileEvent){
-		boolean fileExist = false;
-		try{
-			fileExist = interfaceFileFtpProcess.download(ftpFileEvent.getFileName());
-			if(fileExist) {
-				System.out.println("file exists");
-				ftpFileEvent.setDownloadFlag(true);
-			}else {
-				System.out.println("file doesn't exist");
-				ftpFileEvent.setDownloadFlag(false);
-			}
-		}catch(Exception e){
-			ftpFileEvent.setDownloadFlag(false);
-			System.out.println("download exception :" + e.getMessage());
-			ftpFileEvent.setSftpException(commonUtils.handleErr(e));
-		}
-	}
-*/
 
 	public void getProdsByFile(FtpFileEvent ftpFileEvent){
 		System.out.println("getProdsByFile start");
@@ -74,51 +58,4 @@ public class FtpFileLister {
 		commonUtils.getDetailByFile(ftpFileEvent.getObject(),ftpFileEvent.getFileName(),ftpFileEvent.getProdLst());
 		System.out.println("getDetailByFile End");
 	}
-
-
-	/**
-	 *  Check if download file successfully
-	 *
-	 * @param ftpFileEvent
-	 * @throws Exception
-	 */
-	/*@EventListener
-	public void handleEvent(FtpFileEvent ftpFileEvent) throws Exception {
-		boolean fileExist = false;
-		try{
-			fileExist =ftpFileHandle( ftpFileEvent.getFileName());
-			if(fileExist) {
-				System.out.println("file exists");
-				ftpFileEvent.setDownloadFlag(true);
-			}else {
-				System.out.println("file doesn't exist");
-				ftpFileEvent.setDownloadFlag(false);
-			}
-		}catch(Exception e){
-			ftpFileEvent.setDownloadFlag(false);
-			System.out.println("download exception :" + e.getMessage());
-			ftpFileEvent.setSftpException(commonUtils.handleErr(e));
-		}
-	}*/
-
-	/*
-	*//**
-	 *
-	 *  Download ftp file
-	 * @param fileName
-	 * @return
-	 * @throws Exception
-	 *//*
-	public boolean ftpFileHandle(String fileName) throws Exception {
-		return interfaceFileFtpProcess.download(fileName);
-	}
-
-
-	public void getProdsByFile(List prodLst, String fileName, Object obj){
-		commonUtils.getProdsByFile(prodLst,fileName,obj);
-	}
-
-	public void getDetailByFile(Object obj, String fileName, List detailsLst){
-		commonUtils.getDetailByFile(obj, fileName, detailsLst);
-	}*/
 }

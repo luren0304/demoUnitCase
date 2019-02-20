@@ -55,14 +55,8 @@ public class SftpHandler {
     @Value("${sftp.remoteInpath}")
     private String remoteInpath;
 
-//    @Value("${sftp.remoteInpathBak}")
-//    private String remoteInpathBak;
-
     @Value("${sftp.localInpath}")
     private String localInpath;
-
-//    @Value("${sftp.localInpathBak}")
-//    private String localInpathBak;
 
     @Value("${sftp.remoteOutpath}")
     private String remoteOutpath;
@@ -70,12 +64,14 @@ public class SftpHandler {
     @Value("${sftp.localOutpath}")
     private String localOutpath;
 
-    @Value("${sftp.romteOut.file.extension:txt}")
-    private String remoteOutFileConv;
+    @Value("${sftp.back.file.extension:tmp}")
+    private String bakInFileExtension;
 
-    @Value("${sftp.remoteIn.file.conv:csv}")
-    private String remoteInFileConv;
+    @Value("${sftp.remoteIn.file.extension:csv}")
+    private String remoteInFileExtension;
 
+    @Value("${sftp.waitTime}")
+    private long waitTime;
 
     private static final SpelExpressionParser PARSER = new SpelExpressionParser();
 
@@ -98,7 +94,7 @@ public class SftpHandler {
         SftpInboundFileSynchronizer synchronizer = new SftpInboundFileSynchronizer(sftpSessionFactory());
         synchronizer.setDeleteRemoteFiles(false);
         synchronizer.setRemoteDirectory(remoteInpath);
-        synchronizer.setFilter(new SftpSimplePatternFileListFilter("*." + remoteInFileConv));
+        synchronizer.setFilter(new SftpSimplePatternFileListFilter("*." + remoteInFileExtension));
         System.out.println("sftpInboundFileSynchronizer() End");
         return synchronizer;
     }
@@ -114,11 +110,8 @@ public class SftpHandler {
         SftpInboundFileSynchronizingMessageSource source = new SftpInboundFileSynchronizingMessageSource(sftpInboundFileSynchronizer());
         Map<String, Expression> headerExpressions = new HashMap(2);
         headerExpressions.put("remoteInpath", PARSER.parseExpression("'" + CommonUtils.getFullPath(remoteInpath) +"'") );
-        //headerExpressions.put("remoteInpathBak", PARSER.parseExpression("'" + CommonUtils.getFullPath(remoteInpathBak) + "'") );
-        //headerExpressions.put("localInpath", PARSER.parseExpression("'" + CommonUtils.getFullPath(localInpath) +"'"));
-        //headerExpressions.put("localInpathBak",PARSER.parseExpression("'" + CommonUtils.getFullPath(localInpathBak) +"'"));
         headerExpressions.put("fileMask",PARSER.parseExpression("'." + fileExtension +"'"));
-        headerExpressions.put("bakFileMask",PARSER.parseExpression("'." + "${sftp.back.file.extension}" +"'"));
+        headerExpressions.put("bakFileMask",PARSER.parseExpression("'." + bakInFileExtension +"'"));
         source.setHeaderExpressions(headerExpressions);
         source.setAutoCreateLocalDirectory(true);
         source.setLocalDirectory(new File(path));
@@ -127,7 +120,6 @@ public class SftpHandler {
         final AcceptOnceFileListFilter<File> acceptOnceFileListFilter = new AcceptOnceFileListFilter<>();
         compositeFileListFilter.addFilter(simplePatternFileListFilter);
         compositeFileListFilter.addFilter(acceptOnceFileListFilter);
-        //source.setLocalFilter(new AcceptOnceFileListFilter<File>());
         source.setLocalFilter(compositeFileListFilter);
         System.out.println("sftpMessageSource() End");
         return source;
@@ -142,8 +134,17 @@ public class SftpHandler {
             public void handleMessage(Message<?> message) throws MessagingException {
                 System.out.println("handleMessage() Start");
                 System.out.println(" message: " + message);
-                System.out.println(" Headers: " + message.getHeaders());
-                System.out.println(" Payload: " + message.getPayload());
+
+                File file = (File)message.getPayload();
+                if (file.exists()){
+                    System.out.println("rename file");
+                    File bakFile = new File(file.getPath().replace("." + remoteInFileExtension, "." + bakInFileExtension));
+                    if(file.renameTo(bakFile)){
+                        System.out.println("rename file successfully");
+                    }else{
+                        System.out.println("rename file failed");
+                    }
+                }
                 System.out.println("handleMessage() End");
             }
         };
@@ -156,8 +157,6 @@ public class SftpHandler {
     public MessageHandler renameFiles() {
         System.out.println("renameFiles() Start");
         SftpOutboundGateway sftpOutboundGateway = new  SftpOutboundGateway(sftpSessionFactory(), AbstractRemoteFileOutboundGateway.Command.MV.getCommand(), PARSER.parseExpression("headers.remoteInpath + payload.getName()").getExpressionString());
-        //sftpOutboundGateway.setFilter(new SftpSimplePatternFileListFilter("*." + remoteInFileConv));
-        //sftpOutboundGateway.setRenameExpressionString(PARSER.parseExpression("headers.remoteInpathBak + payload.getName()").getExpressionString());
         sftpOutboundGateway.setRenameExpressionString(PARSER.parseExpression("headers.remoteInpath + payload.getName().replaceFirst(headers.fileMask,headers.bakFileMask)").getExpressionString());
         sftpOutboundGateway.setRequiresReply(false);
         sftpOutboundGateway.setOutputChannelName("nullChannel");

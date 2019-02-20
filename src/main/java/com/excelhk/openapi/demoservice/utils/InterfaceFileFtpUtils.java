@@ -21,11 +21,10 @@ public class InterfaceFileFtpUtils {
 
     @Value("${sftp.localOutpath}")
     private String localOutpath;
-    @Value("${sftp.romteOut.file.conv:txt}")
-    private String remoteOutFileConv;
-    @Value("${sftp.remoteIn.file.conv:txt}")
-    private String remoteInFileConv;
-    private Exception exception;
+    @Value("${sftp.romteOut.file.extension:txt}")
+    private String remoteOutFileExtension;
+    @Value("${sftp.remoteIn.file.extension:csv}")
+    private String remoteInFileExtension;
 
     private static Logger logger = LoggerFactory.getLogger(InterfaceFileFtpUtils.class);
 
@@ -34,7 +33,7 @@ public class InterfaceFileFtpUtils {
 
     public void upload (String fileName) throws Exception {
         try {
-            fileName = fileName + "." + remoteOutFileConv;
+            fileName = fileName + "." + remoteOutFileExtension;
             String localOutpathString = null;
             CommonUtils.checkDirExist(localOutpath);
             if (!localOutpath.endsWith(File.separator)) {
@@ -44,38 +43,16 @@ public class InterfaceFileFtpUtils {
             }
             logger.info("localOutpathString " + localOutpathString);
             uploadGateway.upload(new File(localOutpathString));
-            if(null != exception){
-                throw exception;
-            }
-
         } catch (Exception e) {
             logger.error("upload file failed. error message: " + e.getMessage());
-            e.printStackTrace();
+            Exception exceptionMsg = (Exception)e.getCause();
+            while (null != exceptionMsg) {
+                if(null != exceptionMsg){
+                    e = exceptionMsg;
+                }
+                exceptionMsg = (Exception)exceptionMsg.getCause();
+            }
             throw e;
         }
-    }
-
-    @ServiceActivator(inputChannel="errorChannel")
-    public void errorHandler(ErrorMessage errorMessage) {
-        Exception exceptionMsg = (Exception)errorMessage.getPayload();
-        if(null != exceptionMsg) {
-            exceptionMsg = (Exception) exceptionMsg.getCause();
-            Exception exceptionTmp = exceptionMsg;
-            while (null != exceptionMsg) {
-                if (null != exceptionMsg) {
-                    exceptionTmp = exceptionMsg;
-                }
-                exceptionMsg = (Exception) exceptionMsg.getCause();
-            }
-            setException(exceptionTmp);
-        }
-    }
-
-    public Exception getException() {
-        return exception;
-    }
-
-    public void setException(Exception exception) {
-        this.exception = exception;
     }
 }
