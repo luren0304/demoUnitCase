@@ -78,6 +78,7 @@ public class Deposit {
         this.remark = remark;
     }
 
+
     @Override
     public String toString() {
         return "Deposit{" +
@@ -91,5 +92,15 @@ public class Deposit {
                 ", fee='" + fee + '\'' +
                 ", remark='" + remark + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	    Deposit deposit = null;
+	    if(obj instanceof Deposit){
+            deposit = (Deposit)obj;
+            return deposit.toString().equalsIgnoreCase(this.toString());
+        }
+        return super.equals(obj);
     }
 }

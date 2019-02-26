@@ -48,7 +48,7 @@ public class LoanController {
 			Loan loan = new Loan();
 			loan.setProdId(prodId);
 			loan.setProduct(DemoConstants.PROD_TYPE_LOANS);
-			return commonUtils.responseFtpError(loan);
+			return commonUtils.responseByFtp(loan);
 		}else {
 			return loanService.findByProdId(prodId);
 		}
@@ -65,7 +65,7 @@ public class LoanController {
         logger.info("findAllProd");
 		logger.info("connType " + connType);
         if(StringUtils.isNotEmpty(connType) && DemoConstants.CONNECT_TYPE_FTP.equalsIgnoreCase(connType)) {
-			return commonUtils.responseFtpError(DemoConstants.PROD_TYPE_LOANS, new Loan());
+			return commonUtils.responseByFtp(DemoConstants.PROD_TYPE_LOANS, new Loan());
 		}else {
 			return loanService.findAllProdId();
 		}

@@ -55,4 +55,15 @@ public class FieldMapping {
     public void setField(String field) {
         this.field = field;
     }
+
+    @Override
+    public String toString() {
+        return "FieldMapping{" +
+                "product='" + product + '\'' +
+                ", order=" + order +
+                ", field='" + field + '\'' +
+                ", fieldDesc='" + fieldDesc + '\'' +
+                ", show=" + show +
+                '}';
+    }
 }

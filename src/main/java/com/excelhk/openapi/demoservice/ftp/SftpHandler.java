@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.Resource;
 import org.springframework.expression.Expression;
 import org.springframework.expression.common.LiteralExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -49,7 +50,12 @@ public class SftpHandler {
     @Value("${sftp.user}")
     private String user;
 
-    @Value("${sftp.password}")
+    @Value("${sftp.privateKey:#{null}}")
+    private Resource sftpPrivateKey;
+    @Value("${sftp.privateKeyPassphrase:}")
+    private String sftpPrivateKeyPassphrase;
+
+    @Value("${sftp.password:#{null}}")
     private String password;
 
     @Value("${sftp.remoteInpath}")
@@ -82,7 +88,13 @@ public class SftpHandler {
         factory.setHost(host);
         factory.setPort(port);
         factory.setUser(user);
-        factory.setPassword(password);
+//        factory.setPassword(password);
+        if (sftpPrivateKey != null) {
+            factory.setPrivateKey(sftpPrivateKey);
+            factory.setPrivateKeyPassphrase(sftpPrivateKeyPassphrase);
+        } else {
+            factory.setPassword(password);
+        }
         factory.setAllowUnknownKeys(true);
         System.out.println("sftpSessionFactory() End");
         return new CachingSessionFactory<ChannelSftp.LsEntry>(factory);

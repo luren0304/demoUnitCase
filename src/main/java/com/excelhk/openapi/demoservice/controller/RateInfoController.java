@@ -45,7 +45,7 @@ public class RateInfoController {
 		RateInfo rateInfo = new RateInfo();
 		rateInfo.setCcyCde(ccy);
 		rateInfo.setRelvtCcyCde(relvtCcy);
-		return commonUtils.responseFtpError(rateInfo);
+		return commonUtils.responseByFtp(rateInfo);
 	}
 	
 }

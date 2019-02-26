@@ -99,4 +99,14 @@ public class Loan {
                 ", remark='" + remark + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+	    if(obj != null) {
+            obj = (Loan) obj;
+            return obj.toString().equalsIgnoreCase(this.toString());
+        }
+
+        return super.equals(obj);
+    }
 }

@@ -10,14 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -51,7 +51,7 @@ public class InterfaceFileUtils {
      * @param obj
      * @return
      */
-    public List getDetails(Object obj) throws SftpException{
+    public List getDetails(Object obj){
         List details = new ArrayList();
         String fileName=null;
         if(obj instanceof RateInfo) {
@@ -64,35 +64,35 @@ public class InterfaceFileUtils {
 
         boolean success = commonUtils.generateFile(fileName, obj );
         if(success) {
-            //upload file
             try {
+                //upload file
                 interfaceFileFtpUtils.upload(fileName);
-
-            } catch (Exception e) {
-                throw commonUtils.handleErr(e);
-            }
-
-            logger.info("get file details");
-            FtpFileEvent ftpFileEvent = new FtpFileEvent(this, fileName);
-            ftpFileEvent.setEventType(DemoConstants.EVENT_TYPE_DETAILS);
-            ftpFileEvent.setObject(obj);
-            ftpFileEvent.setProdLst(details);
-            //getFileLoop(ftpFileEvent);
-            if(!getFileLoop(ftpFileEvent)){
-                if(exceptionMessage != null){
-                    logger.error("{} key failed {}",exceptionMessage);
-                    Exception exception = (Exception)exceptionMessage.get(fileName);
-                    if(exception != null){
-                        logger.error("fileName: " + fileName + " exception:" + exception);
-                        throw commonUtils.handleErr(exception);
-                    }else {
-                        exception = (Exception)exceptionMessage.get("Other");
-                        logger.error("Other exception:" + exception);
-                        if(exception != null){
+                logger.info("get file details");
+                FtpFileEvent ftpFileEvent = new FtpFileEvent(this, fileName);
+                ftpFileEvent.setEventType(DemoConstants.EVENT_TYPE_DETAILS);
+                ftpFileEvent.setObject(obj);
+                ftpFileEvent.setProdLst(details);
+                //getFileLoop(ftpFileEvent);
+                if (!getFileLoop(ftpFileEvent)) {
+                    if (exceptionMessage != null) {
+                        logger.error("{} key failed {}", exceptionMessage);
+                        Exception exception = (Exception) exceptionMessage.get(fileName);
+                        if (exception != null) {
+                            logger.error("fileName: " + fileName + " exception:" + exception);
                             throw commonUtils.handleErr(exception);
+                        } else {
+                            exception = (Exception) exceptionMessage.get("Other");
+                            logger.error("Other exception:" + exception);
+                            if (exception != null) {
+                                throw commonUtils.handleErr(exception);
+                            }
                         }
                     }
                 }
+            }catch (SftpException e){
+                details.add(HandlerError(e));
+            } catch (Exception e) {
+                details.add(HandlerError(commonUtils.handleErr(e)));
             }
         }else {
             details.add(obj);
@@ -107,41 +107,42 @@ public class InterfaceFileUtils {
      * @param obj
      * @return
      */
-    public List getProds(String product, Object obj) throws SftpException{
+    public List getProds(String product, Object obj){
         String fileName = null;
         String content = product;
         List pordLst = new ArrayList();
         fileName = commonUtils.getFileName("prod"+ "." + product);
         boolean success = commonUtils.generateFile(fileName,  content);
         if(success) {
-            //upload file
             try {
+                //upload file
                 interfaceFileFtpUtils.upload(fileName);
-            } catch (Exception e) {
-                throw commonUtils.handleErr(e);
-            }
-            logger.info("get file details");
-            FtpFileEvent ftpFileEvent = new FtpFileEvent(this, fileName);
-            ftpFileEvent.setEventType(DemoConstants.EVENT_TYPE_PROD);
-            ftpFileEvent.setObject(obj);
-            ftpFileEvent.setProdLst(pordLst);
-            if(!getFileLoop(ftpFileEvent)){
-                if(exceptionMessage != null){
-                    logger.error("{} key failed {}",exceptionMessage);
-                    Exception exception = (Exception)exceptionMessage.get(fileName);
-                    if(exception != null){
-                        logger.error("exception:" + exception);
-                        throw commonUtils.handleErr(exception);
-                    }else {
-                        exception = (Exception)exceptionMessage.get("Other");
-                        logger.error("exception:" + exception);
-                        if(exception != null){
+                logger.info("get file details");
+                FtpFileEvent ftpFileEvent = new FtpFileEvent(this, fileName);
+                ftpFileEvent.setEventType(DemoConstants.EVENT_TYPE_PROD);
+                ftpFileEvent.setObject(obj);
+                ftpFileEvent.setProdLst(pordLst);
+                if (!getFileLoop(ftpFileEvent)) {
+                    if (exceptionMessage != null) {
+                        logger.error("{} key failed {}", exceptionMessage);
+                        Exception exception = (Exception) exceptionMessage.get(fileName);
+                        if (exception != null) {
+                            logger.error("exception:" + exception);
                             throw commonUtils.handleErr(exception);
+                        } else {
+                            exception = (Exception) exceptionMessage.get("Other");
+                            logger.error("exception:" + exception);
+                            if (exception != null) {
+                                throw commonUtils.handleErr(exception);
+                            }
                         }
                     }
                 }
+            }catch (SftpException e){
+                pordLst.add(HandlerError(e));
+            } catch (Exception e) {
+                pordLst.add(HandlerError(commonUtils.handleErr(e)));
             }
-
         }
         return pordLst;
     }
@@ -203,5 +204,12 @@ public class InterfaceFileUtils {
 
     public void setExceptionMessage(Hashtable exceptionMessage) {
         this.exceptionMessage = exceptionMessage;
+    }
+
+    private ResponseEntity HandlerError(SftpException e){
+        Map<String, String> map = new HashMap<String, String>(1);
+        map.put("error", e.getMessage());
+        logger.error("responseFtpError " +  e.getMessage());
+        return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

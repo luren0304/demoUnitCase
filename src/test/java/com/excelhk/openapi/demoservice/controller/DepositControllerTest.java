@@ -4,6 +4,7 @@ import com.excelhk.openapi.demoservice.bean.Deposit;
 import com.excelhk.openapi.demoservice.service.DepositService;
 import com.excelhk.openapi.demoservice.utils.CommonUtils;
 import com.excelhk.openapi.demoservice.utils.constants.DemoConstants;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -29,9 +30,6 @@ public class DepositControllerTest {
 
     @MockBean
     private DepositService depositService;
-//
-//    @Autowired
-//    private DepositRepository depositRepository;
 
     @MockBean
     private CommonUtils commonUtils;
@@ -43,20 +41,35 @@ public class DepositControllerTest {
         //System.out.println("${sftp.conn.type}");
         Deposit deposit = new Deposit();
         deposit.setProduct("Deposit");
-        deposit.setProdId("D4");
+        deposit.setProdId("D9");
         deposit.setCurrency("USD");
-        deposit.setRemark("test case 1");
+        deposit.setRemark("test case 9");
         deposit.setMinamount("1000");
         List<Deposit> deposits = Arrays.asList(deposit);
         System.out.println("deposits: " + deposits);
-        BDDMockito.given(depositService.findByProdId("D4")).willReturn(deposits);
-        BDDMockito.given(commonUtils.responseFtpError(deposit)).willReturn(deposits);
-        mockMvc.perform(MockMvcRequestBuilders.get("/deposits/findone/prodid/D4")
+        List depositsFtp = Arrays.asList(deposit);
+
+        Deposit deposit1 = new Deposit();
+        deposit1.setProdId("D9");
+        deposit1.setProduct(DemoConstants.PROD_TYPE_DEPOSIT);
+
+        BDDMockito.given(depositService.findByProdId("D9")).willReturn(deposits);
+        BDDMockito.given(commonUtils.responseByFtp(deposit1)).willReturn(depositsFtp);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/deposits/findone/prodid/D9")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("connection-type", "ftp"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].minamount", Matchers.is("1000")))
+                .andDo(MockMvcResultHandlers.print());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/deposits/findone/prodid/D9")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("connection-type", "db"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
 //                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
-//                .andExpect(MockMvcResultMatchers.jsonPath("$[0].minamount",Matchers.is("1000")))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$[0].minamount", Matchers.is("1000")))
                 .andDo(MockMvcResultHandlers.print());
 
 
@@ -73,8 +86,8 @@ public class DepositControllerTest {
         deposit.setMinamount("1000.05");
         //depositRepository.save(deposit);
         List<Deposit> deposits = Arrays.asList(deposit);
-        BDDMockito.given(depositService.findAllProdId()).willReturn(deposits);
-        BDDMockito.given(commonUtils.responseFtpError(DemoConstants.PROD_TYPE_DEPOSIT,new Deposit())).willReturn(deposit);
+//        BDDMockito.given(depositService.findAllProdId()).willReturn(deposits);
+//        BDDMockito.given(commonUtils.responseByFtp(DemoConstants.PROD_TYPE_DEPOSIT,new Deposit())).willReturn(deposits);
         mockMvc.perform( MockMvcRequestBuilders.get("/deposits/findProd")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("connection-type", "ftp"))

@@ -18,15 +18,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * @author anita
@@ -525,22 +525,14 @@ public class CommonUtils {
 		return new SftpException(errCode, errMsg);
 	}
 
-	public  Object responseFtpError(Object obj){
-		return responseFtpError(null, obj);
+	public  List responseByFtp(Object obj){
+		return responseByFtp(null, obj);
 	}
-	public Object responseFtpError(String prod , Object obj){
-		try {
-			if(StringUtils.isEmpty(prod)) {
-				return interfaceFileUtils.getDetails(obj);
-			} else {
-				return interfaceFileUtils.getProds(prod,obj);
-			}
-
-		} catch (SftpException e) {
-			Map<String, String> map = new HashMap<String, String>(1);
-			map.put("error", e.getMessage());
-			logger.error("responseFtpError " +  e.getMessage());
-			return new ResponseEntity<Object>(map, HttpStatus.INTERNAL_SERVER_ERROR);
+	public List responseByFtp(String prod , Object obj){
+		if(StringUtils.isEmpty(prod)) {
+			return interfaceFileUtils.getDetails(obj);
+		} else {
+			return interfaceFileUtils.getProds(prod,obj);
 		}
 	}
 

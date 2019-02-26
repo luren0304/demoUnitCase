@@ -1,11 +1,15 @@
 package com.excelhk.openapi.demoservice;
 
-import java.io.File;
-
 public class TestCase {
 
     public static void main(String [] args){
-        String localInpath = "ftp-inbound/";
+        int i = -1;
+        System.out.println(++i);
+        System.out.println(i++);
+
+
+
+       /* String localInpath = "ftp-inbound/";
         String fileName = "prod.Deposits.D1.578219702174720.tmp";
         //fileName = localInpath + fileName;
         System.out.println("backup fileName: " + fileName );
@@ -15,6 +19,6 @@ public class TestCase {
             System.out.println("backup file successfully" );
         }else{
             System.out.println("backup file failed" );
-        }
+        }*/
     }
 }

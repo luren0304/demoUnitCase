@@ -53,7 +53,7 @@ public class DepositController {
 			Deposit deposit = new Deposit();
 			deposit.setProdId(prodId);
 			deposit.setProduct(DemoConstants.PROD_TYPE_DEPOSIT);
-			return commonUtils.responseFtpError(deposit);
+			return commonUtils.responseByFtp(deposit);
 		}else {
 			return depositService.findByProdId(prodId);
 
@@ -72,7 +72,7 @@ public class DepositController {
         logger.info("findAllProd");
 		logger.info("connType " + connType);
 		if(StringUtils.isNotEmpty(connType) && DemoConstants.CONNECT_TYPE_FTP.equalsIgnoreCase(connType)) {
-            return commonUtils.responseFtpError(DemoConstants.PROD_TYPE_DEPOSIT,new Deposit());
+            return commonUtils.responseByFtp(DemoConstants.PROD_TYPE_DEPOSIT,new Deposit());
 		}else {
             return depositService.findAllProdId();
 		}

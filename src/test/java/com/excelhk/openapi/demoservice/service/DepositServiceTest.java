@@ -15,7 +15,6 @@ import java.util.List;
 public class DepositServiceTest {
 
     @Autowired
-//    @Mock
     DepositService depositService;
     //@Autowired
     //DepositRepository depositRepository;
