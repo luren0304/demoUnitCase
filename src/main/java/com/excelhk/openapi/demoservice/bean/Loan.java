@@ -102,11 +102,10 @@ public class Loan {
 
     @Override
     public boolean equals(Object obj) {
-	    if(obj != null) {
-            obj = (Loan) obj;
-            return obj.toString().equalsIgnoreCase(this.toString());
+        if (obj == null || !(obj instanceof Loan)) {
+            return super.equals(obj);
         }
+        return obj.toString().equalsIgnoreCase(this.toString());
 
-        return super.equals(obj);
     }
 }

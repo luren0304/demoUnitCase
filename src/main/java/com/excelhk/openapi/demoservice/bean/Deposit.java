@@ -96,11 +96,10 @@ public class Deposit {
 
     @Override
     public boolean equals(Object obj) {
-	    Deposit deposit = null;
-	    if(obj instanceof Deposit){
-            deposit = (Deposit)obj;
-            return deposit.toString().equalsIgnoreCase(this.toString());
+        if(obj == null || !(obj instanceof Deposit)){
+            return super.equals(obj);
+        }else {
+            return obj.toString().equalsIgnoreCase(this.toString());
         }
-        return super.equals(obj);
     }
 }

@@ -193,11 +193,11 @@ public class InterfaceFileUtils {
             String fileName = null;
             if(message == null){
                 fileName = "Other";
+                exceptionTable.put(fileName, exceptionTmp);
             }else{
                 fileName = (String)message.getHeaders().get("file_name");
+                exceptionTable.put(fileName.substring(0, fileName.lastIndexOf(".")), exceptionTmp);
             }
-
-            exceptionTable.put(fileName.substring(0, fileName.lastIndexOf(".")), exceptionTmp);
             setExceptionMessage(exceptionTable);
         }
     }

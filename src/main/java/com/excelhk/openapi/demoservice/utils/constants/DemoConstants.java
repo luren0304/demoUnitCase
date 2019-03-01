@@ -30,6 +30,13 @@ public class DemoConstants {
     public static final String TIME_OUT = "timeout:";
     public static final String CONN_REFUSED = "Connection refused";
 
+    public static final String ERR_MSG_LOGIN_FAILED = "ftp login failed";
+    public static final String ERR_MSG_CONN_TIMED_OUT ="ftp Connection timed out";
+    public static final String ERR_MSG_CONN_REFUSED = "ftp Connection refused";
+    public static final String ERR_MSG_CONN_EXPT= "ftp Connection Exception";
+    public static final String ERR_MSG_CONN_ERR= "Connection error";
+    public static final String ERR_MSG_501= "Internal Server error";
+
     // Event Handle type
     //public static final String EVENT_TYPE_DOWNLOAD="DOWNLOAD";
     public static final String EVENT_TYPE_PROD="PROD";

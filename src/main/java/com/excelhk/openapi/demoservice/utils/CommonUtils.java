@@ -371,7 +371,7 @@ public class CommonUtils {
 			RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().withSeparator(fileDelimiter).build();
 			reader = new CSVReaderBuilder(new FileReader(localInpathString)).withCSVParser(rfc4180Parser).build();
 			while((nextLine=reader.readNext()) != null) {
-				logger.info("nextLine.length : " +nextLine.length);
+				logger.info("nextLine.length : " + nextLine.length);
 				if(info.getProdId() == null) {
 					info.setProdId(nextLine[0]);
 				}
@@ -498,32 +498,42 @@ public class CommonUtils {
 			logger.error("login or connect error. error message: " + msg);
 			if(msg != null) {
 				if (msg.contains(DemoConstants.AUTH_FAIL)) {
-					errMsg = "ftp login failed";
+//					errMsg = "ftp login failed";
+					errMsg = DemoConstants.ERR_MSG_LOGIN_FAILED;
 				}else if (msg.contains(DemoConstants.CONN_TIMED_OUT) || msg.contains(DemoConstants.TIME_OUT)) {
-					errMsg = "ftp Connection timed out";
+//					errMsg = "ftp Connection timed out";
+					errMsg = DemoConstants.ERR_MSG_CONN_TIMED_OUT;
 				}else if (msg.contains(DemoConstants.CONN_REFUSED)) {
-					errMsg = "ftp Connection refused";
+//					errMsg = "ftp Connection refused";
+					errMsg = DemoConstants.ERR_MSG_CONN_REFUSED;
 				}else {
-					errMsg = "ftp Connection Exception";
+//					errMsg = "ftp Connection Exception";
+					errMsg = DemoConstants.ERR_MSG_CONN_EXPT;
+
 				}
 			}else {
 				errMsg = "ftp Connection Exception";
+				errMsg = DemoConstants.ERR_MSG_CONN_EXPT;
 			}
 		}else if (e instanceof SftpException) {
 			logger.error("ChannelSftp " + msg);
 			if(((SftpException) e).id == ChannelSftp.SSH_FX_NO_CONNECTION || ((SftpException) e).id == ChannelSftp.SSH_FX_CONNECTION_LOST ){
-				msg = "Connection error";
+//				msg = "Connection error";
+				msg = DemoConstants.ERR_MSG_CONN_ERR;
 			}else {
-				msg = "Internal Server error";
+//				msg = "Internal Server error";
+				msg = DemoConstants.ERR_MSG_501;
 			}
 			errMsg = "ftp error: " + msg;
 		}else {
 			logger.error("other error message: " + msg);
-			msg = "Internal Server error";
+//			msg = "Internal Server error";
+			msg = DemoConstants.ERR_MSG_501;
 			errMsg = msg;
 		}
 		return new SftpException(errCode, errMsg);
 	}
+
 
 	public  List responseByFtp(Object obj){
 		return responseByFtp(null, obj);
