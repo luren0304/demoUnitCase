@@ -27,4 +27,6 @@ public interface DepositRepository extends MongoRepository<Deposit, String> {
     @Query(value="{}", fields= "{'prodId' : 1,'_id' : 0}")
     public List<Deposit> findAllprodId();
 
+
+
 }

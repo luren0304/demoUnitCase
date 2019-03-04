@@ -14,7 +14,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.integration.annotation.*;
 import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.core.MessageSource;
-import org.springframework.integration.file.FileNameGenerator;
 import org.springframework.integration.file.filters.AcceptOnceFileListFilter;
 import org.springframework.integration.file.filters.CompositeFileListFilter;
 import org.springframework.integration.file.filters.SimplePatternFileListFilter;
@@ -27,10 +26,8 @@ import org.springframework.integration.sftp.inbound.SftpInboundFileSynchronizer;
 import org.springframework.integration.sftp.inbound.SftpInboundFileSynchronizingMessageSource;
 import org.springframework.integration.sftp.outbound.SftpMessageHandler;
 import org.springframework.integration.sftp.session.DefaultSftpSessionFactory;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 import java.io.File;
 import java.util.HashMap;
@@ -52,6 +49,7 @@ public class SftpHandler {
 
     @Value("${sftp.privateKey:#{null}}")
     private Resource sftpPrivateKey;
+
     @Value("${sftp.privateKeyPassphrase:}")
     private String sftpPrivateKeyPassphrase;
 
@@ -88,7 +86,6 @@ public class SftpHandler {
         factory.setHost(host);
         factory.setPort(port);
         factory.setUser(user);
-//        factory.setPassword(password);
         if (sftpPrivateKey != null) {
             factory.setPrivateKey(sftpPrivateKey);
             factory.setPrivateKeyPassphrase(sftpPrivateKeyPassphrase);
@@ -141,24 +138,21 @@ public class SftpHandler {
     @ServiceActivator(inputChannel="downloadChannel")
     public MessageHandler downloadFiles() {
         System.out.println("downloadFiles() Start");
-        return new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-                System.out.println("handleMessage() Start");
-                System.out.println(" message: " + message);
+        return message -> {
+            System.out.println("handleMessage() Start");
+            System.out.println(" message: " + message);
 
-                File file = (File)message.getPayload();
-                if (file.exists()){
-                    System.out.println("rename file");
-                    File bakFile = new File(file.getPath().replace("." + remoteInFileExtension, "." + bakInFileExtension));
-                    if(file.renameTo(bakFile)){
-                        System.out.println("rename file successfully");
-                    }else{
-                        System.out.println("rename file failed");
-                    }
+            File file = (File)message.getPayload();
+            if (file.exists()){
+                System.out.println("rename file");
+                File bakFile = new File(file.getPath().replace("." + remoteInFileExtension, "." + bakInFileExtension));
+                if(file.renameTo(bakFile)){
+                    System.out.println("rename file successfully");
+                }else{
+                    System.out.println("rename file failed");
                 }
-                System.out.println("handleMessage() End");
             }
+            System.out.println("handleMessage() End");
         };
     }
 
@@ -184,19 +178,15 @@ public class SftpHandler {
     public MessageHandler handler() {
         SftpMessageHandler handler = new SftpMessageHandler(sftpSessionFactory());
         handler.setRemoteDirectoryExpression(new LiteralExpression(remoteOutpath));
-        handler.setFileNameGenerator(new FileNameGenerator() {
-            @Override
-            public String generateFileName(Message<?> message) {
-                System.out.println(message.getHeaders());
-                System.out.println(message.getPayload());
-                if (message.getPayload() instanceof File) {
+        handler.setFileNameGenerator(message -> {
+            System.out.println(message.getHeaders());
+            System.out.println(message.getPayload());
+            if (message.getPayload() instanceof File) {
 
-                    return ((File) message.getPayload()).getName();
-                } else {
-                    throw new IllegalArgumentException("File expected as payload.");
-                }
+                return ((File) message.getPayload()).getName();
+            } else {
+                throw new IllegalArgumentException("File expected as payload.");
             }
-
         });
         return handler;
     }

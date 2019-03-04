@@ -1,5 +1,6 @@
 package com.excelhk.openapi.demoservice.repository;
 
+import com.excelhk.openapi.demoservice.MongoTestConfiguration;
 import com.excelhk.openapi.demoservice.bean.Deposit;
 import com.excelhk.openapi.demoservice.utils.constants.DemoConstants;
 import org.assertj.core.api.Assertions;
@@ -7,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
@@ -14,26 +16,22 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @DataMongoTest
-//@SpringBootTest
+@ContextConfiguration(classes = { MongoTestConfiguration.class })
 public class DepositRepositoryUnitTest {
 
     @Autowired
     private DepositRepository depositRepository;
-
-//    @Autowired
-//    private MongoTemplate mongoTemplate;
 
     @Test
     public void whenFindByProdId_thenReturnDeposits(){
 
         // When
         List<Deposit> deposits = depositRepository.findByProdId("D1");
-//        List<Deposit> deposits = depositRepository.findAllprodId();
+        System.out.println("deposits.size(): " + deposits.size());
         //then
         for (Deposit deposit:deposits
              ) {
             System.out.println(deposit);
-//            Assert.assertThat(deposit.getProduct());
             Assertions.assertThat(deposit.getProduct()).isEqualTo(DemoConstants.PROD_TYPE_DEPOSIT);
         }
 

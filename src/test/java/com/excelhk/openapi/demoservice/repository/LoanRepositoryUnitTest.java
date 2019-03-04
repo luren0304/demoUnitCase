@@ -1,5 +1,6 @@
 package com.excelhk.openapi.demoservice.repository;
 
+import com.excelhk.openapi.demoservice.MongoTestConfiguration;
 import com.excelhk.openapi.demoservice.bean.Loan;
 import com.excelhk.openapi.demoservice.utils.constants.DemoConstants;
 import org.junit.Assert;
@@ -7,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @DataMongoTest
+@ContextConfiguration(classes = { MongoTestConfiguration.class })
 public class LoanRepositoryUnitTest {
 
     @Autowired

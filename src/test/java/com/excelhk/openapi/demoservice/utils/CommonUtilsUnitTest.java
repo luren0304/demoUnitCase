@@ -28,8 +28,6 @@ public class CommonUtilsUnitTest {
 
     @Test
     public void testGenerateFileWithBothString() {
-//        CommonUtils commonUtils = new CommonUtils();
-//        assertEquals(false,commonUtils.generateFile("test","test123"));
         assertEquals(true, commonUtils.generateFile("test", "test123"));
     }
 
@@ -54,7 +52,6 @@ public class CommonUtilsUnitTest {
         Loan loan = new Loan();
         loan.setProduct(DemoConstants.PROD_TYPE_LOANS);
         String fileName = "test.loans";
-        //List list = Arrays.asList(loan);
         List list =  new ArrayList();
         // no found file
        commonUtils.getProdsByFile(list,fileName,loan );
